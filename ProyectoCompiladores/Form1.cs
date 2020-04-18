@@ -37,8 +37,8 @@ namespace ProyectoCompiladores
         OpenFileDialog ofd;
         SaveFileDialog sfd;
 
-        String[] keywords = { "public", "void", "using", "static", "class" };
-        String[] dataTypes = { "int", "bool", "char", "string" };
+        String[] keywords = { "public", "void", "using", "static", "class", "#include", "namespace", "if", "else", "return", "int", "bool", "float", "char", "string" };
+        String[] dataTypes = { "std", "main", "(", ")", ";", "system", "cout", "<<" };
 
         HashSet<string> keywordsHashSet;
         HashSet<string> dataTypesHashSet;
@@ -199,12 +199,16 @@ namespace ProyectoCompiladores
         private void colorToken(string token){
             if (keywordsHashSet.Contains(token))
             {
-                codeRichTextBox.SelectionColor = Color.Blue;
+                codeRichTextBox.SelectionColor = Color.LightBlue;
             }
 
             if (dataTypesHashSet.Contains(token))
             {
-                codeRichTextBox.SelectionColor = Color.MediumPurple;
+                codeRichTextBox.SelectionColor = Color.LightPink;
+            }
+            if ( (token.Substring(0) == "<" || token.Substring(0).Equals('"')) && (token.Substring(token.Length) == ">" || token.Substring(token.Length).Equals('"')) )
+            {
+                codeRichTextBox.SelectionColor = Color.Orange;
             }
         }
 
@@ -217,7 +221,7 @@ namespace ProyectoCompiladores
             cmd.StartInfo.UseShellExecute = false;
             cmd.Start();
 
-            cmd.StandardInput.WriteLine("cd C:/Users/Carlos/desktop");
+            cmd.StandardInput.WriteLine("cd C:/Users/monic/OneDrive/Escritorio");
             cmd.StandardInput.WriteLine("mkdir carpeta");
             cmd.StandardInput.WriteLine("echo 'hola'");
             cmd.StandardInput.Flush();
@@ -243,6 +247,7 @@ namespace ProyectoCompiladores
         {
             codeRichTextBox.Text = "";
             fileNameLabel.Text = "Nuevo archivo";
+            fileOpened = false;
         }
     }
 }
