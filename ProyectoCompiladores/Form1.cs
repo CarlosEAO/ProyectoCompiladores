@@ -37,13 +37,14 @@ namespace ProyectoCompiladores
         OpenFileDialog ofd;
         SaveFileDialog sfd;
 
-        String[] keywords = { "public", "void", "using", "static", "class", "#include", "namespace", "if", "else", "return", "int", "bool", "float", "char", "string" };
-        String[] dataTypes = { "std", "main", "(", ")", ";", "system", "cout", "<<" };
+        String[] keywords = { "program", "if", "else", "fi", "do", "until", "while", "read", "write", "not","and","or" };
+        String[] dataTypes = { "float", "bool", "int" };
 
         HashSet<string> keywordsHashSet;
         HashSet<string> dataTypesHashSet;
 
         bool fileOpened;
+        bool fileSaved;
 
         public Form1()
         {
@@ -57,6 +58,7 @@ namespace ProyectoCompiladores
             codeRichTextBox.SelectionFont = new Font("Courier New", 10, FontStyle.Regular);
             fileNameLabel.Text = "Nuevo archivo";
             fileOpened = false;
+            fileSaved = false;
         }
 
         private void openFileButton_Click(object sender, EventArgs e)
@@ -73,27 +75,11 @@ namespace ProyectoCompiladores
                 Parse(readFile);
                 fileNameLabel.Text = ofd.FileName;
                 fileOpened = true;
+                fileSaved = true;
             }          
         }
 
-        private void saveFileButton_Click(object sender, EventArgs e)
-        {
-            if (fileOpened)
-            {
-                codeRichTextBox.SaveFile(fileNameLabel.Text, RichTextBoxStreamType.PlainText);
-            }
-            else
-            {
-                sfd = new SaveFileDialog();
-                sfd.ShowDialog();
-                if (sfd.FileName != "")
-                {
-                    codeRichTextBox.SaveFile(sfd.FileName, RichTextBoxStreamType.PlainText);
-                    fileOpened = true;
-                    fileNameLabel.Text = sfd.FileName;
-                }
-            }
-        }
+       
 
 
         void Parse(string code)
@@ -140,6 +126,9 @@ namespace ProyectoCompiladores
 
         private void codeRichTextBox_TextChanged(object sender, EventArgs e)
         {
+
+            fileSaved = false;
+
             FreezeDraw();
             // Calculate the starting position of the current line.  
             int start = 0, end = 0;
@@ -161,7 +150,7 @@ namespace ProyectoCompiladores
             int selectionLength = codeRichTextBox.SelectionLength;
 
             // Split the line into tokens.  
-            Regex r = new Regex("([ \\t{}();])");
+            Regex r = new Regex("([ \\t{}();,])");
             string[] tokens = r.Split(line);
             int index = start;
             foreach (string token in tokens)
@@ -199,12 +188,12 @@ namespace ProyectoCompiladores
         private void colorToken(string token){
             if (keywordsHashSet.Contains(token))
             {
-                codeRichTextBox.SelectionColor = Color.LightBlue;
+                codeRichTextBox.SelectionColor = Color.Red;
             }
 
             if (dataTypesHashSet.Contains(token))
             {
-                codeRichTextBox.SelectionColor = Color.LightPink;
+                codeRichTextBox.SelectionColor = Color.Yellow;
             }
             if ( (token.Substring(0) == "<" || token.Substring(0).Equals('"')) && (token.Substring(token.Length) == ">" || token.Substring(token.Length).Equals('"')) )
             {
@@ -212,26 +201,7 @@ namespace ProyectoCompiladores
             }
         }
 
-        private void compileButton_Click(object sender, EventArgs e)
-        {
-            Process cmd = new Process();
-            cmd.StartInfo.FileName = "cmd.exe";
-            cmd.StartInfo.RedirectStandardInput = true;
-            cmd.StartInfo.RedirectStandardOutput = true;
-            cmd.StartInfo.UseShellExecute = false;
-            cmd.Start();
-
-            cmd.StandardInput.WriteLine("cd C:/Users/monic/OneDrive/Escritorio");
-            cmd.StandardInput.WriteLine("mkdir carpeta");
-            cmd.StandardInput.WriteLine("echo 'hola'");
-            cmd.StandardInput.Flush();
-            cmd.StandardInput.Close();
-            cmd.WaitForExit();
-            Console.WriteLine(cmd.StandardOutput.ReadToEnd());
-
-        }
-
-        private void saveFileAsButton_Click(object sender, EventArgs e)
+        private void saveFileAs()
         {
             sfd = new SaveFileDialog();
             sfd.ShowDialog();
@@ -241,6 +211,29 @@ namespace ProyectoCompiladores
                 fileOpened = true;
                 fileNameLabel.Text = sfd.FileName;
             }
+            fileSaved = true;
+        }
+        private void saveFile()
+        {
+            if (fileOpened)
+            {
+                codeRichTextBox.SaveFile(fileNameLabel.Text, RichTextBoxStreamType.PlainText);
+            }
+            else
+            {
+                saveFileAs();
+            }
+            fileSaved = true;
+        }
+
+        private void saveFileButton_Click(object sender, EventArgs e)
+        {
+            saveFile();   
+        }
+
+        private void saveFileAsButton_Click(object sender, EventArgs e)
+        {
+            saveFileAs();
         }
 
         private void newFileButton_Click(object sender, EventArgs e)
@@ -248,6 +241,43 @@ namespace ProyectoCompiladores
             codeRichTextBox.Text = "";
             fileNameLabel.Text = "Nuevo archivo";
             fileOpened = false;
+            fileSaved = false;
+        }
+
+        private void compileButton_Click(object sender, EventArgs e)
+        {
+
+            if (!fileSaved)
+            {
+                saveFile();
+                if (!fileSaved) return;
+            }
+
+            var processStartInfo = new ProcessStartInfo();
+
+            processStartInfo.WorkingDirectory = Path.Combine(Environment.CurrentDirectory, "compiler\\lexic");
+            processStartInfo.FileName = "lexic.exe";
+            processStartInfo.Arguments = fileNameLabel.Text;
+
+            Process compileProcess = new Process();
+            compileProcess.StartInfo = processStartInfo;
+            //fileNameLabel.Text = (compileProcess.StartInfo.WorkingDirectory);
+            compileProcess.Start();
+            compileProcess.WaitForExit();
+            
+            string fileName = "compiler/lexic/tokens.txt";
+            lexicRichTextBox.Text = File.ReadAllText(fileName);
+           
+            if (compileProcess.ExitCode == 0)
+            {
+                errorsRichTextBox.Text = "0 Errores";
+            }
+            else
+            {
+                errorsRichTextBox.Text = File.ReadAllText("compiler/lexic/errors.txt");
+            }
+            compileProcess.Close();
+
         }
     }
 }
