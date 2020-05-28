@@ -88,6 +88,8 @@ const (
 type Token struct {
 	Type      int
 	Attribute string
+	Row       int
+	Column    int
 }
 
 func getNextChar() rune {
@@ -168,6 +170,8 @@ func getToken() Token {
 				nextChar = getNextChar()
 			}
 			token.Attribute += string(nextChar)
+			token.Row = currentLine
+			token.Column = currentColumn
 			if isAlpha(nextChar) { //START OF ANY WORD
 				state = InWord
 			} else if isNumeric(nextChar) { //START OF ANY NUMBER
@@ -408,10 +412,10 @@ func main() {
 			if currentToken.Type == TknError {
 				//fmt.Println("Valio madre en la linea ", currentLine, ", '", currentToken.Attribute, "' no corresponde a ningun token")
 				exitCode = 2
-				errorsFile.WriteString("Valio madre en la linea " + strconv.Itoa(currentLine) + ", '" + currentToken.Attribute + "' no corresponde a ningun token.\n")
+				errorsFile.WriteString("Valio madre en la linea " + strconv.Itoa(currentLine) + ", columna " + strconv.Itoa(currentColumn) + ". '" + currentToken.Attribute + "' no corresponde a ningun token.\n")
 			} else {
 				//fmt.Println(currentToken)
-				outputFile.WriteString(strconv.Itoa(currentToken.Type) + " " + string(currentToken.Attribute) + "\n")
+				outputFile.WriteString(strconv.Itoa(currentToken.Type) + " " + string(currentToken.Attribute) + " " + strconv.Itoa(currentToken.Row) + " " + strconv.Itoa(currentToken.Column) + "\n")
 			}
 			currentToken = getToken()
 		}

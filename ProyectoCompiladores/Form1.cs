@@ -209,21 +209,21 @@ namespace ProyectoCompiladores
             {
                 codeRichTextBox.SaveFile(sfd.FileName, RichTextBoxStreamType.PlainText);
                 fileOpened = true;
-                fileNameLabel.Text = sfd.FileName;
+                fileNameLabel.Text = sfd.FileName;            
+                fileSaved = true;
             }
-            fileSaved = true;
         }
         private void saveFile()
         {
             if (fileOpened)
             {
                 codeRichTextBox.SaveFile(fileNameLabel.Text, RichTextBoxStreamType.PlainText);
+                fileSaved = true;
             }
             else
             {
                 saveFileAs();
             }
-            fileSaved = true;
         }
 
         private void saveFileButton_Click(object sender, EventArgs e)
@@ -238,35 +238,42 @@ namespace ProyectoCompiladores
 
         private void newFileButton_Click(object sender, EventArgs e)
         {
-            codeRichTextBox.Text = "";
-            fileNameLabel.Text = "Nuevo archivo";
-            fileOpened = false;
-            fileSaved = false;
+            DialogResult dialogResult = MessageBox.Show("¿Quieres guardar el archivo actual?", "...", MessageBoxButtons.YesNoCancel);
+            
+           
+            if (dialogResult == DialogResult.Yes)
+            {
+                saveFile();
+            }
+            if (dialogResult == DialogResult.No || dialogResult == DialogResult.Yes)
+            {
+                codeRichTextBox.Text = "";
+                fileNameLabel.Text = "Nuevo archivo";
+                fileOpened = false;
+                fileSaved = false;
+            }
+           
         }
 
         private void compileButton_Click(object sender, EventArgs e)
         {
 
-            if (!fileSaved)
-            {
+            
                 saveFile();
                 if (!fileSaved) return;
-            }
+            
 
             var processStartInfo = new ProcessStartInfo();
 
-            processStartInfo.WorkingDirectory = Path.Combine(Environment.CurrentDirectory, "compiler\\lexic");
-            processStartInfo.FileName = "lexic.exe";
+            processStartInfo.WorkingDirectory = Path.Combine(Directory.GetParent(Environment.CurrentDirectory).Parent.FullName, "src\\compiler\\lexic");            processStartInfo.FileName = "lexic.exe";
             processStartInfo.Arguments = fileNameLabel.Text;
 
             Process compileProcess = new Process();
             compileProcess.StartInfo = processStartInfo;
-            //fileNameLabel.Text = (compileProcess.StartInfo.WorkingDirectory);
             compileProcess.Start();
             compileProcess.WaitForExit();
             
-            string fileName = "compiler/lexic/tokens.txt";
-            lexicRichTextBox.Text = File.ReadAllText(fileName);
+            lexicRichTextBox.Text = File.ReadAllText(Path.Combine(Directory.GetParent(Environment.CurrentDirectory).Parent.FullName, "src\\compiler\\lexic\\tokens.txt"));
            
             if (compileProcess.ExitCode == 0)
             {
@@ -274,7 +281,7 @@ namespace ProyectoCompiladores
             }
             else
             {
-                errorsRichTextBox.Text = File.ReadAllText("compiler/lexic/errors.txt");
+                errorsRichTextBox.Text = File.ReadAllText(Path.Combine(Directory.GetParent(Environment.CurrentDirectory).Parent.FullName, "src\\compiler\\lexic\\errors.txt"));
             }
             compileProcess.Close();
 
