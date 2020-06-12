@@ -1,6 +1,0 @@
-uno
-dos
-int main
-a=b;
-
-.perro

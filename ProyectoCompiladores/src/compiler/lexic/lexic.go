@@ -21,49 +21,52 @@ var currentLine int = 0
 
 var err error
 
-var keywords = [...]string{"program", "if", "else", "fi", "do", "until", "while", "read", "write", "float", "int", "bool", "not", "and", "or"}
+var keywords = [...]string{"program", "if", "then", "else", "fi", "do", "until", "while", "read", "write", "float", "int", "bool", "true", "false", "not", "and", "or"}
 
 //TOKEN TYPES
 const (
 	TknProgram  = 0
 	TknIf       = 1
-	TknElse     = 2
-	TknFi       = 3
-	TknDo       = 4
-	TknUntil    = 5
-	TknWhile    = 6
-	TknRead     = 7
-	TknWrite    = 8
-	TknFloat    = 9
-	TknInt      = 10
-	TknBool     = 11
-	TknNot      = 12
-	TknAnd      = 13
-	TknOr       = 14
-	TknSum      = 15
-	TknSub      = 16
-	TknMul      = 17
-	TknDiv      = 18
-	TknExp      = 19
-	TknLess     = 20
-	TknLessEq   = 21
-	TknGreat    = 22
-	TknGreatEq  = 23
-	TknEq       = 24
-	TknNotEq    = 25
-	TknAssign   = 26
-	TknSemi     = 27
-	TknComma    = 28
-	TknLeftPar  = 29
-	TknRightPar = 30
-	TknLeftBr   = 31
-	TknRightBr  = 32
-	TknError    = 33
-	TknIdent    = 34
-	TknEOF      = 35
-	TknComment  = 36
-	TknConst    = 37
-	TknWord     = 38
+	TknThen     = 2
+	TknElse     = 3
+	TknFi       = 4
+	TknDo       = 5
+	TknUntil    = 6
+	TknWhile    = 7
+	TknRead     = 8
+	TknWrite    = 9
+	TknFloat    = 10
+	TknInt      = 11
+	TknBool     = 12
+	TknTrue     = 13
+	TknFalse    = 14
+	TknNot      = 15
+	TknAnd      = 16
+	TknOr       = 17
+	TknSum      = 18
+	TknSub      = 19
+	TknMul      = 20
+	TknDiv      = 21
+	TknExp      = 22
+	TknLess     = 23
+	TknLessEq   = 24
+	TknGreat    = 25
+	TknGreatEq  = 26
+	TknEq       = 27
+	TknNotEq    = 28
+	TknAssign   = 29
+	TknSemi     = 30
+	TknComma    = 31
+	TknLeftPar  = 32
+	TknRightPar = 33
+	TknLeftBr   = 34
+	TknRightBr  = 35
+	TknError    = 36
+	TknIdent    = 37
+	TknEOF      = 38
+	TknComment  = 39
+	TknConst    = 40
+	TknWord     = 41
 )
 
 //STATES
@@ -103,6 +106,7 @@ func getNextChar() rune {
 		}
 
 	}
+	//13 por el retorno de carro
 	if buffer[currentColumn] == 13 {
 		currentColumn++
 	}
@@ -152,7 +156,7 @@ func isKeyWord(word string) int {
 			return i
 		}
 	}
-	return 38
+	return TknIdent
 }
 
 //getToken dsff...
@@ -381,12 +385,12 @@ func main() {
 
 		reader = bufio.NewReader(sourceFile)
 
-		outputFile, err = os.Create("tokens.txt")
+		outputFile, err = os.Create("output/tokens.txt")
 		if err != nil {
 			os.Exit(1)
 			log.Fatal(err)
 		}
-		errorsFile, err = os.Create("errors.txt")
+		errorsFile, err = os.Create("output/errors.txt")
 		if err != nil {
 			os.Exit(1)
 			log.Fatal(err)
@@ -419,6 +423,7 @@ func main() {
 			}
 			currentToken = getToken()
 		}
+		outputFile.WriteString(strconv.Itoa(currentToken.Type) + " " + "EOF" + " " + strconv.Itoa(currentToken.Row) + " " + strconv.Itoa(currentToken.Column) + "\n")
 	}
 
 	os.Exit(exitCode)

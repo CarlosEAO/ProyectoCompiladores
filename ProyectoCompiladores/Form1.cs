@@ -259,29 +259,31 @@ namespace ProyectoCompiladores
         {
 
             
-                saveFile();
-                if (!fileSaved) return;
+            saveFile();
+            if (!fileSaved) return;
             
 
-            var processStartInfo = new ProcessStartInfo();
-
-            processStartInfo.WorkingDirectory = Path.Combine(Directory.GetParent(Environment.CurrentDirectory).Parent.FullName, "src\\compiler\\lexic");            processStartInfo.FileName = "lexic.exe";
-            processStartInfo.Arguments = fileNameLabel.Text;
-
             Process compileProcess = new Process();
-            compileProcess.StartInfo = processStartInfo;
+            compileProcess.StartInfo.WorkingDirectory = Path.Combine(Directory.GetParent(Environment.CurrentDirectory).Parent.FullName, "src\\compiler\\lexic");
+            compileProcess.StartInfo.FileName = "lexic.exe";
+            compileProcess.StartInfo.Arguments = fileNameLabel.Text;
             compileProcess.Start();
             compileProcess.WaitForExit();
             
-            lexicRichTextBox.Text = File.ReadAllText(Path.Combine(Directory.GetParent(Environment.CurrentDirectory).Parent.FullName, "src\\compiler\\lexic\\tokens.txt"));
+            lexicRichTextBox.Text = File.ReadAllText(Path.Combine(Directory.GetParent(Environment.CurrentDirectory).Parent.FullName, "src\\compiler\\lexic\\output\\tokens.txt"));
            
             if (compileProcess.ExitCode == 0)
             {
-                errorsRichTextBox.Text = "0 Errores";
+                /*Process syntaxProcess = new Process();
+                syntaxProcess.StartInfo.WorkingDirectory = Path.Combine(Directory.GetParent(Environment.CurrentDirectory).Parent.FullName, "src\\compiler\\syntax");
+                syntaxProcess.StartInfo.FileName = "syntax.exe";
+                syntaxProcess.StartInfo.Arguments = Path.Combine(Directory.GetParent(Environment.CurrentDirectory).Parent.FullName, "src\\compiler\\lexic\\output\\tokens.txt");
+                syntaxProcess.Start();
+                syntaxProcess.WaitForExit();*/
             }
             else
             {
-                errorsRichTextBox.Text = File.ReadAllText(Path.Combine(Directory.GetParent(Environment.CurrentDirectory).Parent.FullName, "src\\compiler\\lexic\\errors.txt"));
+                errorsRichTextBox.Text = File.ReadAllText(Path.Combine(Directory.GetParent(Environment.CurrentDirectory).Parent.FullName, "src\\compiler\\lexic\\output\\errors.txt"));
             }
             compileProcess.Close();
 
