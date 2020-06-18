@@ -23,48 +23,48 @@ var la int
 
 //TOKEN TYPES
 const (
-	TknProgram  = 0
-	TknIf       = 1
-	TknThen     = 2
-	TknElse     = 3
-	TknFi       = 4
-	TknDo       = 5
-	TknUntil    = 6
-	TknWhile    = 7
-	TknRead     = 8
-	TknWrite    = 9
-	TknFloat    = 10
-	TknInt      = 11
-	TknBool     = 12
-	TknTrue     = 13
-	TknFalse    = 14
-	TknNot      = 15
-	TknAnd      = 16
-	TknOr       = 17
-	TknSum      = 18
-	TknSub      = 19
-	TknMul      = 20
-	TknDiv      = 21
-	TknExp      = 22
-	TknLess     = 23
-	TknLessEq   = 24
-	TknGreat    = 25
-	TknGreatEq  = 26
-	TknEq       = 27
-	TknNotEq    = 28
-	TknAssign   = 29
-	TknSemi     = 30
-	TknComma    = 31
-	TknLeftPar  = 32
-	TknRightPar = 33
-	TknLeftBr   = 34
-	TknRightBr  = 35
-	TknError    = 36
-	TknIdent    = 37
-	TknEOF      = 38
-	TknComment  = 39
-	TknConst    = 40
-	TknWord     = 41
+	TknProgram  = 1
+	TknIf       = 2
+	TknThen     = 3
+	TknElse     = 4
+	TknFi       = 5
+	TknDo       = 6
+	TknUntil    = 7
+	TknWhile    = 8
+	TknRead     = 9
+	TknWrite    = 10
+	TknFloat    = 11
+	TknInt      = 12
+	TknBool     = 13
+	TknTrue     = 14
+	TknFalse    = 15
+	TknNot      = 16
+	TknAnd      = 17
+	TknOr       = 18
+	TknSum      = 19
+	TknSub      = 20
+	TknMul      = 21
+	TknDiv      = 22
+	TknExp      = 23
+	TknLess     = 24
+	TknLessEq   = 25
+	TknGreat    = 26
+	TknGreatEq  = 27
+	TknEq       = 28
+	TknNotEq    = 29
+	TknAssign   = 30
+	TknSemi     = 31
+	TknComma    = 32
+	TknLeftPar  = 33
+	TknRightPar = 34
+	TknLeftBr   = 35
+	TknRightBr  = 36
+	TknError    = 37
+	TknIdent    = 38
+	TknEOF      = 39
+	TknComment  = 40
+	TknConst    = 41
+	TknWord     = 42
 )
 
 var tokens []Token
@@ -72,6 +72,7 @@ var tokens []Token
 //Token blaablabla
 type Token struct {
 	Type      int
+	Name      string
 	Attribute string
 	Row       int
 	Column    int
@@ -82,9 +83,10 @@ func readTokens() {
 		s := strings.Split(scanner.Text(), " ")
 		var auxToken Token
 		auxToken.Type, err = strconv.Atoi(s[0])
-		auxToken.Attribute = s[1]
-		auxToken.Row, err = strconv.Atoi(s[2])
-		auxToken.Column, err = strconv.Atoi(s[3])
+		auxToken.Name = s[1]
+		auxToken.Attribute = s[2]
+		auxToken.Row, err = strconv.Atoi(s[3])
+		auxToken.Column, err = strconv.Atoi(s[4])
 		tokens = append(tokens, auxToken)
 
 	}

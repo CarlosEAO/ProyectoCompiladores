@@ -1,0 +1,237 @@
+{
+programa , 0
+{
+program , 1
+}
+{
+{ , 35
+}
+{
+listaDeclaraciones , 0
+{
+declaracion , 0
+{
+tipo , 0
+{
+int , 12
+}
+}
+{
+listaIdent , 0
+{
+a , 38
+}
+}
+{
+; , 31
+}
+}
+{
+declaracion , 0
+{
+tipo , 0
+{
+bool , 13
+}
+}
+{
+listaIdent , 0
+{
+b , 38
+}
+{
+, , 32
+}
+{
+c , 38
+}
+}
+{
+; , 31
+}
+}
+}
+{
+listaSentencias , 0
+{
+sentencia , 0
+{
+seleccion , 0
+{
+if , 2
+}
+{
+( , 33
+}
+{
+bExpresion , 0
+{
+bTerm , 0
+{
+notFactor , 0
+{
+bFactor , 0
+{
+relacion , 0
+{
+expresion , 0
+{
+termino , 0
+{
+signoFactor , 0
+{
+factor , 0
+{
+a , 38
+}
+}
+}
+}
+}
+{
+relOp , 0
+{
+< , 24
+}
+}
+{
+expresion , 0
+{
+termino , 0
+{
+signoFactor , 0
+{
+factor , 0
+{
+b , 38
+}
+}
+}
+}
+}
+}
+}
+}
+}
+}
+{
+) , 34
+}
+{
+then , 3
+}
+{
+bloque , 0
+{
+{ , 35
+}
+{
+listaSentencias , 0
+{
+sentencia , 0
+{
+sentenciaWrite , 0
+{
+write , 10
+}
+{
+bExpresion , 0
+{
+bTerm , 0
+{
+notFactor , 0
+{
+bFactor , 0
+{
+relacion , 0
+{
+expresion , 0
+{
+termino , 0
+{
+signoFactor , 0
+{
+factor , 0
+{
+( , 33
+}
+{
+bExpresion , 0
+{
+bTerm , 0
+{
+notFactor , 0
+{
+bFactor , 0
+{
+relacion , 0
+{
+expresion , 0
+{
+termino , 0
+{
+signoFactor , 0
+{
+factor , 0
+{
+x , 38
+}
+}
+}
+}
+{
+sumaOP , 0
+{
++ , 19
+}
+}
+{
+termino , 0
+{
+signoFactor , 0
+{
+factor , 0
+{
+3 , 41
+}
+}
+}
+}
+}
+}
+}
+}
+}
+}
+{
+) , 34
+}
+}
+}
+}
+}
+}
+}
+}
+}
+}
+{
+; , 31
+}
+}
+}
+}
+{
+} , 36
+}
+}
+{
+fi , 5
+}
+}
+}
+}
+{
+} , 36
+}
+}

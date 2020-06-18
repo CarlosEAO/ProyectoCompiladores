@@ -96,7 +96,7 @@ namespace ProyectoCompiladores
 
         void ParseLine(string line)
         {
-            Regex r = new Regex("([ \\t{}();])");
+            Regex r = new Regex("([ \\t{}();,\\n])");
             String[] tokens = r.Split(line);
 
             foreach (string token in tokens)
@@ -150,7 +150,7 @@ namespace ProyectoCompiladores
             int selectionLength = codeRichTextBox.SelectionLength;
 
             // Split the line into tokens.  
-            Regex r = new Regex("([ \\t{}();,])");
+            Regex r = new Regex("([ \\t{}();,\\n])");
             string[] tokens = r.Split(line);
             int index = start;
             foreach (string token in tokens)
@@ -257,36 +257,47 @@ namespace ProyectoCompiladores
 
         private void compileButton_Click(object sender, EventArgs e)
         {
+            TreeNode parseTreeRoot = new TreeNode();
 
-            
+            parseTreeRoot.Text = "root";
+            parseTreeRoot.Nodes.Add(new TreeNode("putos"));
+            parseTreeRoot.Nodes.Add(new TreeNode("todos"));
+
+            parseTreeView.Nodes.Add(parseTreeRoot);
+
+
             saveFile();
             if (!fileSaved) return;
             
 
-            Process compileProcess = new Process();
-            compileProcess.StartInfo.WorkingDirectory = Path.Combine(Directory.GetParent(Environment.CurrentDirectory).Parent.FullName, "src\\compiler\\lexic");
-            compileProcess.StartInfo.FileName = "lexic.exe";
-            compileProcess.StartInfo.Arguments = fileNameLabel.Text;
-            compileProcess.Start();
-            compileProcess.WaitForExit();
+            Process lexicProcess = new Process();
+            lexicProcess.StartInfo.WorkingDirectory = Path.Combine(Directory.GetParent(Environment.CurrentDirectory).Parent.FullName, "src\\compiler");
+            lexicProcess.StartInfo.FileName = "lexic.exe";
+            lexicProcess.StartInfo.Arguments = fileNameLabel.Text;
+            lexicProcess.Start();
+            lexicProcess.WaitForExit();
+            lexicProcess.Close();
+
+            lexicRichTextBox.Text = File.ReadAllText(Path.Combine(Directory.GetParent(Environment.CurrentDirectory).Parent.FullName, "src\\compiler\\output\\tokens.txt"));
+
+
+            Process syntaxProcess = new Process();
+            syntaxProcess.StartInfo.WorkingDirectory = Path.Combine(Directory.GetParent(Environment.CurrentDirectory).Parent.FullName, "src\\compiler");
+            syntaxProcess.StartInfo.FileName = "syntaxTree.exe";
+            syntaxProcess.StartInfo.Arguments = Path.Combine(Directory.GetParent(Environment.CurrentDirectory).Parent.FullName, "src\\compiler\\output\\tokens.txt");
+            syntaxProcess.Start();
+            syntaxProcess.WaitForExit();
+            syntaxProcess.Close();
+
+
+            errorsRichTextBox.Text = File.ReadAllText(Path.Combine(Directory.GetParent(Environment.CurrentDirectory).Parent.FullName, "src\\compiler\\output\\errors.txt"));
+
+
             
-            lexicRichTextBox.Text = File.ReadAllText(Path.Combine(Directory.GetParent(Environment.CurrentDirectory).Parent.FullName, "src\\compiler\\lexic\\output\\tokens.txt"));
-           
-            if (compileProcess.ExitCode == 0)
-            {
-                /*Process syntaxProcess = new Process();
-                syntaxProcess.StartInfo.WorkingDirectory = Path.Combine(Directory.GetParent(Environment.CurrentDirectory).Parent.FullName, "src\\compiler\\syntax");
-                syntaxProcess.StartInfo.FileName = "syntax.exe";
-                syntaxProcess.StartInfo.Arguments = Path.Combine(Directory.GetParent(Environment.CurrentDirectory).Parent.FullName, "src\\compiler\\lexic\\output\\tokens.txt");
-                syntaxProcess.Start();
-                syntaxProcess.WaitForExit();*/
-            }
-            else
-            {
-                errorsRichTextBox.Text = File.ReadAllText(Path.Combine(Directory.GetParent(Environment.CurrentDirectory).Parent.FullName, "src\\compiler\\lexic\\output\\errors.txt"));
-            }
-            compileProcess.Close();
+
 
         }
+
+        
     }
 }

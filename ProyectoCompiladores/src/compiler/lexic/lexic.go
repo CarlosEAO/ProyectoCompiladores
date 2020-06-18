@@ -21,52 +21,56 @@ var currentLine int = 0
 
 var err error
 
-var keywords = [...]string{"program", "if", "then", "else", "fi", "do", "until", "while", "read", "write", "float", "int", "bool", "true", "false", "not", "and", "or"}
+var keywords = [...]string{"", "program", "if", "then", "else", "fi", "do", "until", "while", "read", "write", "float", "int", "bool", "true", "false", "not", "and", "or"}
+
+var tokenNames = [...]string{"", "programa", "if", "then", "else", "fi", "do", "until", "while", "read", "write", "float", "int", "bool", "true", "false", "not", "and", "or",
+	"+", "-", "*", "/", "^", "<", "<=", ">", ">=", "==", "!=", "=", ";", ",", "(", ")", "{", "}", "error", "identificador", "eof", "comentario", "constante numerica", "palabra",
+}
 
 //TOKEN TYPES
 const (
-	TknProgram  = 0
-	TknIf       = 1
-	TknThen     = 2
-	TknElse     = 3
-	TknFi       = 4
-	TknDo       = 5
-	TknUntil    = 6
-	TknWhile    = 7
-	TknRead     = 8
-	TknWrite    = 9
-	TknFloat    = 10
-	TknInt      = 11
-	TknBool     = 12
-	TknTrue     = 13
-	TknFalse    = 14
-	TknNot      = 15
-	TknAnd      = 16
-	TknOr       = 17
-	TknSum      = 18
-	TknSub      = 19
-	TknMul      = 20
-	TknDiv      = 21
-	TknExp      = 22
-	TknLess     = 23
-	TknLessEq   = 24
-	TknGreat    = 25
-	TknGreatEq  = 26
-	TknEq       = 27
-	TknNotEq    = 28
-	TknAssign   = 29
-	TknSemi     = 30
-	TknComma    = 31
-	TknLeftPar  = 32
-	TknRightPar = 33
-	TknLeftBr   = 34
-	TknRightBr  = 35
-	TknError    = 36
-	TknIdent    = 37
-	TknEOF      = 38
-	TknComment  = 39
-	TknConst    = 40
-	TknWord     = 41
+	TknProgram  = 1
+	TknIf       = 2
+	TknThen     = 3
+	TknElse     = 4
+	TknFi       = 5
+	TknDo       = 6
+	TknUntil    = 7
+	TknWhile    = 8
+	TknRead     = 9
+	TknWrite    = 10
+	TknFloat    = 11
+	TknInt      = 12
+	TknBool     = 13
+	TknTrue     = 14
+	TknFalse    = 15
+	TknNot      = 16
+	TknAnd      = 17
+	TknOr       = 18
+	TknSum      = 19
+	TknSub      = 20
+	TknMul      = 21
+	TknDiv      = 22
+	TknExp      = 23
+	TknLess     = 24
+	TknLessEq   = 25
+	TknGreat    = 26
+	TknGreatEq  = 27
+	TknEq       = 28
+	TknNotEq    = 29
+	TknAssign   = 30
+	TknSemi     = 31
+	TknComma    = 32
+	TknLeftPar  = 33
+	TknRightPar = 34
+	TknLeftBr   = 35
+	TknRightBr  = 36
+	TknError    = 37
+	TknIdent    = 38
+	TknEOF      = 39
+	TknComment  = 40
+	TknConst    = 41
+	TknWord     = 42
 )
 
 //STATES
@@ -89,10 +93,11 @@ const (
 
 //Token blaablabla
 type Token struct {
-	Type      int
-	Attribute string
-	Row       int
-	Column    int
+	Type   int
+	Name   string
+	Lexeme string
+	Row    int
+	Column int
 }
 
 func getNextChar() rune {
@@ -173,7 +178,7 @@ func getToken() Token {
 			for isDelim(nextChar) {
 				nextChar = getNextChar()
 			}
-			token.Attribute += string(nextChar)
+			token.Lexeme += string(nextChar)
 			token.Row = currentLine
 			token.Column = currentColumn
 			if isAlpha(nextChar) { //START OF ANY WORD
@@ -182,17 +187,21 @@ func getToken() Token {
 				state = InNumber
 			} else if nextChar == '+' {
 				token.Type = TknSum
+				token.Name = "Suma"
 				state = DoneState
 			} else if nextChar == '-' {
 				token.Type = TknSub
+				token.Name = "Resta"
 				state = DoneState
 			} else if nextChar == '*' {
 				token.Type = TknMul
+				token.Name = "Multiplicacion"
 				state = DoneState
 			} else if nextChar == '/' { //START OF COMMENT OR DIVISION
 				state = InSlash
 			} else if nextChar == '^' {
 				token.Type = TknExp
+				token.Name = "Exponente"
 				state = DoneState
 			} else if nextChar == '<' { //LESS THAN OR LTE
 				state = InLessThan
@@ -204,27 +213,35 @@ func getToken() Token {
 				state = InNotEqual
 			} else if nextChar == ';' {
 				token.Type = TknSemi
+				token.Name = "PuntoYComa"
 				state = DoneState
 			} else if nextChar == ',' {
 				token.Type = TknComma
+				token.Name = "Coma"
 				state = DoneState
 			} else if nextChar == '(' {
 				token.Type = TknLeftPar
+				token.Name = "ParentesisIzq"
 				state = DoneState
 			} else if nextChar == ')' {
 				token.Type = TknRightPar
+				token.Name = "ParentesisDer"
 				state = DoneState
 			} else if nextChar == '{' {
 				token.Type = TknLeftBr
+				token.Name = "LlaveIzq"
 				state = DoneState
 			} else if nextChar == '}' {
 				token.Type = TknRightBr
+				token.Name = "LlaveDer"
 				state = DoneState
 			} else if nextChar == 0 {
 				token.Type = TknEOF
+				token.Name = "FindeArchivo"
 				state = DoneState
 			} else {
 				token.Type = TknError
+				token.Name = "Error"
 				state = DoneState
 			}
 		case InWord:
@@ -234,53 +251,58 @@ func getToken() Token {
 				state = DoneState
 				rollBackChar()
 			} else {
-				token.Attribute += string(nextChar)
+				token.Lexeme += string(nextChar)
 			}
 		case InNumber:
 			nextChar = getNextChar()
 			if isNumeric(nextChar) {
-				token.Attribute += string(nextChar)
+				token.Lexeme += string(nextChar)
 			} else if nextChar == '.' {
-				token.Attribute += string(nextChar)
+				token.Lexeme += string(nextChar)
 				state = InDecimal
 			} else {
 				token.Type = TknConst
+				token.Name = "ConstanteNumerica"
 				state = DoneState
 				rollBackChar()
 			}
 		case InDecimal:
 			nextChar = getNextChar()
 			if isNumeric(nextChar) {
-				token.Attribute += string(nextChar)
+				token.Lexeme += string(nextChar)
 				state = InOptionalDecimal
 			} else {
 				token.Type = TknError
+				token.Name = "Error"
 				state = DoneState
 				rollBackChar()
 			}
 		case InOptionalDecimal:
 			nextChar = getNextChar()
 			if isNumeric(nextChar) {
-				token.Attribute += string(nextChar)
+				token.Lexeme += string(nextChar)
 			} else if nextChar == '.' {
 				token.Type = TknError
+				token.Name = "Error"
 				state = DoneState
 				rollBackChar()
 			} else {
 				token.Type = TknConst
+				token.Name = "ConstanteNumerica"
 				state = DoneState
 				rollBackChar()
 			}
 		case InSlash:
 			nextChar = getNextChar()
 			if nextChar == '/' {
-				token.Attribute += string(nextChar)
+				token.Lexeme += string(nextChar)
 				state = InLineComment
 			} else if nextChar == '*' {
-				token.Attribute += string(nextChar)
+				token.Lexeme += string(nextChar)
 				state = InBlockComment
 			} else {
 				token.Type = TknDiv
+				token.Name = "Division"
 				state = DoneState
 				rollBackChar()
 			}
@@ -288,6 +310,7 @@ func getToken() Token {
 			nextChar = getNextChar()
 			if nextChar == '\n' {
 				token.Type = TknComment
+				token.Name = "Comentario"
 				state = DoneState
 				rollBackChar()
 			} else {
@@ -302,6 +325,7 @@ func getToken() Token {
 			nextChar = getNextChar()
 			if nextChar == '/' {
 				token.Type = TknComment
+				token.Name = "Comentario"
 				state = DoneState
 			} else if nextChar != '*' {
 				state = InBlockComment
@@ -310,50 +334,59 @@ func getToken() Token {
 		case InLessThan:
 			nextChar = getNextChar()
 			if nextChar == '=' {
-				token.Attribute += string(nextChar)
+				token.Lexeme += string(nextChar)
 				token.Type = TknLessEq
+				token.Name = "MenoroIgual"
 				state = DoneState
 			} else {
 				token.Type = TknLess
+				token.Name = "Menorestricto"
 				state = DoneState
 				rollBackChar()
 			}
 		case InGreaterThan:
 			nextChar = getNextChar()
 			if nextChar == '=' {
-				token.Attribute += string(nextChar)
+				token.Lexeme += string(nextChar)
 				token.Type = TknGreatEq
+				token.Name = "MayorOIgual"
 				state = DoneState
 			} else {
 				token.Type = TknGreat
+				token.Name = "MayorEstricto"
 				state = DoneState
 				rollBackChar()
 			}
 		case InEqual:
 			nextChar = getNextChar()
 			if nextChar == '=' {
-				token.Attribute += string(nextChar)
+				token.Lexeme += string(nextChar)
 				token.Type = TknEq
+				token.Name = "Igualdad"
 				state = DoneState
 			} else {
 				token.Type = TknAssign
+				token.Name = "Asignacion"
 				state = DoneState
 				rollBackChar()
 			}
 		case InNotEqual:
 			nextChar = getNextChar()
 			if nextChar == '=' {
-				token.Attribute += string(nextChar)
+				token.Lexeme += string(nextChar)
 				token.Type = TknNotEq
+				token.Name = "Diferente"
 				state = DoneState
 			} else {
 				token.Type = TknError
+				token.Name = "Error"
 				state = DoneState
 				rollBackChar()
 			}
 		default:
 			{
 				token.Type = TknError
+				token.Name = "Error"
 				state = DoneState
 			}
 		}
@@ -362,7 +395,12 @@ func getToken() Token {
 
 	if token.Type == TknWord {
 
-		token.Type = isKeyWord(token.Attribute)
+		token.Type = isKeyWord(token.Lexeme)
+		if token.Type == TknIdent {
+			token.Name = "Identificador"
+		} else {
+			token.Name = keywords[token.Type]
+		}
 	}
 	return token
 }
@@ -414,16 +452,16 @@ func main() {
 
 		for currentToken.Type != TknEOF {
 			if currentToken.Type == TknError {
-				//fmt.Println("Valio madre en la linea ", currentLine, ", '", currentToken.Attribute, "' no corresponde a ningun token")
+				//fmt.Println("Valio madre en la linea ", currentLine, ", '", currentToken.Lexeme, "' no corresponde a ningun token")
 				exitCode = 2
-				errorsFile.WriteString("Valio madre en la linea " + strconv.Itoa(currentLine) + ", columna " + strconv.Itoa(currentColumn) + ". '" + currentToken.Attribute + "' no corresponde a ningun token.\n")
+				errorsFile.WriteString("Valio madre en la linea " + strconv.Itoa(currentLine) + ", columna " + strconv.Itoa(currentColumn) + ". '" + currentToken.Lexeme + "' no corresponde a ningun token.\n")
 			} else {
 				//fmt.Println(currentToken)
-				outputFile.WriteString(strconv.Itoa(currentToken.Type) + " " + string(currentToken.Attribute) + " " + strconv.Itoa(currentToken.Row) + " " + strconv.Itoa(currentToken.Column) + "\n")
+				outputFile.WriteString(strconv.Itoa(currentToken.Type) + " " + currentToken.Name + " " + string(currentToken.Lexeme) + " " + strconv.Itoa(currentToken.Row) + " " + strconv.Itoa(currentToken.Column) + "\n")
 			}
 			currentToken = getToken()
 		}
-		outputFile.WriteString(strconv.Itoa(currentToken.Type) + " " + "EOF" + " " + strconv.Itoa(currentToken.Row) + " " + strconv.Itoa(currentToken.Column) + "\n")
+		outputFile.WriteString(strconv.Itoa(currentToken.Type) + " " + "Fin de archivo" + " " + "EOF" + " " + strconv.Itoa(currentToken.Row) + " " + strconv.Itoa(currentToken.Column) + "\n")
 	}
 
 	os.Exit(exitCode)

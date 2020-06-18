@@ -1,43 +1,27 @@
-0 program 1 1
-34 { 1 9
-11 int 3 2
-37 x 3 6
-31 , 3 7
-37 y 3 8
-30 ; 3 9
-37 x 4 2
-29 = 4 4
-40 0 4 6
-30 ; 4 7
-37 y 5 2
-29 = 5 4
-40 4 5 6
-30 ; 5 7
-5 do 6 2
-34 { 6 4
-1 if 7 3
-32 ( 7 5
-37 x 7 6
-23 < 7 7
-37 y 7 8
-33 ) 7 9
-2 then 7 10
-34 { 7 14
-37 y 8 4
-29 = 8 6
-37 y 8 8
-19 - 8 9
-40 1 8 10
-30 ; 8 11
-35 } 9 3
-4 fi 9 5
-35 } 10 2
-6 until 10 4
-32 ( 10 10
-37 y 10 11
-26 >= 10 12
-40 0 10 14
-33 ) 10 15
-30 ; 10 16
-35 } 12 1
-38 EOF 13 0
+1 program program 1 1
+35 LlaveIzq { 1 9
+12 int int 17 2
+38 Identificador a 17 6
+31 PuntoYComa ; 17 7
+13 bool bool 25 2
+38 Identificador b 25 7
+32 Coma , 25 8
+31 PuntoYComa ; 25 9
+2 if if 29 2
+33 ParentesisIzq ( 29 4
+38 Identificador a 29 5
+24 Menorestricto < 29 6
+38 Identificador b 29 7
+34 ParentesisDer ) 29 8
+3 then then 29 10
+35 LlaveIzq { 29 14
+10 write write 31 3
+33 ParentesisIzq ( 31 9
+38 Identificador x 31 10
+19 Suma + 31 11
+41 ConstanteNumerica 3 31 12
+34 ParentesisDer ) 31 13
+31 PuntoYComa ; 31 14
+36 LlaveDer } 33 2
+36 LlaveDer } 41 1
+39 Fin de archivo EOF 296 0
