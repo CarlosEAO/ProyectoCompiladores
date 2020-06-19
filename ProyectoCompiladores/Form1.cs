@@ -76,7 +76,7 @@ namespace ProyectoCompiladores
                 fileNameLabel.Text = ofd.FileName;
                 fileOpened = true;
                 fileSaved = true;
-            }          
+            } 
         }
 
        
@@ -255,43 +255,73 @@ namespace ProyectoCompiladores
            
         }
 
+        System.IO.StreamReader parseTreeFile;
+
+
+        private void recurre(TreeNode currentNode)
+        {
+            string aux = parseTreeFile.ReadLine();
+            if(aux == null)
+            {
+                parseTreeFile.Close();
+                return;
+            }
+            if(aux == "}")
+            {
+                recurre(currentNode.Parent);
+            }
+            else if (aux == "{")
+            {
+                TreeNode newNode = new TreeNode();
+
+                aux = parseTreeFile.ReadLine();
+                newNode.Text = aux;
+                currentNode.Nodes.Add(newNode);
+                recurre(newNode);
+            }
+            else
+            {
+                currentNode.Nodes.Add(aux);
+                recurre(currentNode);
+            }
+
+
+        }
+
         private void compileButton_Click(object sender, EventArgs e)
         {
-            TreeNode parseTreeRoot = new TreeNode();
-
-            parseTreeRoot.Text = "root";
-            parseTreeRoot.Nodes.Add(new TreeNode("putos"));
-            parseTreeRoot.Nodes.Add(new TreeNode("todos"));
-
-            parseTreeView.Nodes.Add(parseTreeRoot);
-
-
             saveFile();
             if (!fileSaved) return;
             
 
             Process lexicProcess = new Process();
-            lexicProcess.StartInfo.WorkingDirectory = Path.Combine(Directory.GetParent(Environment.CurrentDirectory).Parent.FullName, "src\\compiler");
+            lexicProcess.StartInfo.WorkingDirectory = Path.Combine(Directory.GetParent(Environment.CurrentDirectory).Parent.FullName, "compiler");
             lexicProcess.StartInfo.FileName = "lexic.exe";
             lexicProcess.StartInfo.Arguments = fileNameLabel.Text;
             lexicProcess.Start();
             lexicProcess.WaitForExit();
-            lexicProcess.Close();
 
-            lexicRichTextBox.Text = File.ReadAllText(Path.Combine(Directory.GetParent(Environment.CurrentDirectory).Parent.FullName, "src\\compiler\\output\\tokens.txt"));
+            lexicRichTextBox.Text = File.ReadAllText(Path.Combine(Directory.GetParent(Environment.CurrentDirectory).Parent.FullName, "compiler\\output\\tokens.txt"));
 
 
             Process syntaxProcess = new Process();
-            syntaxProcess.StartInfo.WorkingDirectory = Path.Combine(Directory.GetParent(Environment.CurrentDirectory).Parent.FullName, "src\\compiler");
+            syntaxProcess.StartInfo.WorkingDirectory = Path.Combine(Directory.GetParent(Environment.CurrentDirectory).Parent.FullName, "compiler");
             syntaxProcess.StartInfo.FileName = "syntaxTree.exe";
-            syntaxProcess.StartInfo.Arguments = Path.Combine(Directory.GetParent(Environment.CurrentDirectory).Parent.FullName, "src\\compiler\\output\\tokens.txt");
+            syntaxProcess.StartInfo.Arguments = Path.Combine(Directory.GetParent(Environment.CurrentDirectory).Parent.FullName, "compiler\\output\\tokens.txt");
             syntaxProcess.Start();
             syntaxProcess.WaitForExit();
-            syntaxProcess.Close();
+
+            TreeNode parseTreeRoot = new TreeNode();
+            parseTreeRoot.Text = "raiz";
+            parseTreeFile = new System.IO.StreamReader(Path.Combine(Directory.GetParent(Environment.CurrentDirectory).Parent.FullName, "compiler\\output\\parseTree.txt"));
+
+            recurre(parseTreeRoot);
+            parseTreeView.Nodes.Clear();
+            parseTreeView.Nodes.Add(parseTreeRoot);
 
 
-            errorsRichTextBox.Text = File.ReadAllText(Path.Combine(Directory.GetParent(Environment.CurrentDirectory).Parent.FullName, "src\\compiler\\output\\errors.txt"));
-
+            errorsRichTextBox.Text = File.ReadAllText(Path.Combine(Directory.GetParent(Environment.CurrentDirectory).Parent.FullName, "compiler\\output\\errors.txt"));
+            
 
             
 

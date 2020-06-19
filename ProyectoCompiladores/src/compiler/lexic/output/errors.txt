@@ -1,3 +1,0 @@
-Valio madre en la linea 1, columna 10. '.' no corresponde a ningun token.
-Valio madre en la linea 1, columna 11. '.' no corresponde a ningun token.
-Valio madre en la linea 1, columna 12. '.' no corresponde a ningun token.

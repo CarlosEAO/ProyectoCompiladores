@@ -21,6 +21,18 @@ listaIdent , 0
 {
 a , 38
 }
+{
+, , 32
+}
+{
+b , 38
+}
+{
+, , 32
+}
+{
+c , 38
+}
 }
 {
 ; , 31
@@ -37,13 +49,7 @@ bool , 13
 {
 listaIdent , 0
 {
-b , 38
-}
-{
-, , 32
-}
-{
-c , 38
+flag , 38
 }
 }
 {
@@ -82,7 +88,7 @@ signoFactor , 0
 {
 factor , 0
 {
-a , 38
+flag , 38
 }
 }
 }
@@ -91,7 +97,7 @@ a , 38
 {
 relOp , 0
 {
-< , 24
+== , 28
 }
 }
 {
@@ -103,7 +109,25 @@ signoFactor , 0
 {
 factor , 0
 {
-b , 38
+( , 33
+}
+{
+bExpresion , 0
+{
+bTerm , 0
+{
+notFactor , 0
+{
+bFactor , 0
+{
+true , 14
+}
+}
+}
+}
+}
+{
+) , 34
 }
 }
 }
@@ -174,25 +198,7 @@ signoFactor , 0
 {
 factor , 0
 {
-x , 38
-}
-}
-}
-}
-{
-sumaOP , 0
-{
-+ , 19
-}
-}
-{
-termino , 0
-{
-signoFactor , 0
-{
-factor , 0
-{
-3 , 41
+1 , 41
 }
 }
 }
