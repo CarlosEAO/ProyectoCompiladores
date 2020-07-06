@@ -62,6 +62,51 @@ listaSentencias , 0
 {
 sentencia , 0
 {
+asignacion , 0
+{
+a , 38
+}
+{
+= , 30
+}
+{
+bExpresion , 0
+{
+bTerm , 0
+{
+notFactor , 0
+{
+bFactor , 0
+{
+relacion , 0
+{
+expresion , 0
+{
+termino , 0
+{
+signoFactor , 0
+{
+factor , 0
+{
+3.1 , 41
+}
+}
+}
+}
+}
+}
+}
+}
+}
+}
+{
+; , 31
+}
+}
+}
+{
+sentencia , 0
+{
 seleccion , 0
 {
 if , 2

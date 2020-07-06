@@ -37,7 +37,7 @@ namespace ProyectoCompiladores
         OpenFileDialog ofd;
         SaveFileDialog sfd;
 
-        String[] keywords = { "program", "if", "else", "fi", "do", "until", "while", "read", "write", "not","and","or" };
+        String[] keywords = { "program", "if","then", "else", "fi", "do", "until", "while", "read", "write", "not","and","or" };
         String[] dataTypes = { "float", "bool", "int" };
 
         HashSet<string> keywordsHashSet;
@@ -321,10 +321,6 @@ namespace ProyectoCompiladores
 
 
             errorsRichTextBox.Text = File.ReadAllText(Path.Combine(Directory.GetParent(Environment.CurrentDirectory).Parent.FullName, "compiler\\output\\errors.txt"));
-            
-
-            
-
 
         }
 

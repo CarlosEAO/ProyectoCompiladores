@@ -402,6 +402,7 @@ func getToken() Token {
 			token.Name = keywords[token.Type]
 		}
 	}
+
 	return token
 }
 
@@ -457,7 +458,9 @@ func main() {
 				errorsFile.WriteString("Valio madre en la linea " + strconv.Itoa(currentLine) + ", columna " + strconv.Itoa(currentColumn) + ". '" + currentToken.Lexeme + "' no corresponde a ningun token.\n")
 			} else {
 				//fmt.Println(currentToken)
-				outputFile.WriteString(strconv.Itoa(currentToken.Type) + " " + currentToken.Name + " " + string(currentToken.Lexeme) + " " + strconv.Itoa(currentToken.Row) + " " + strconv.Itoa(currentToken.Column) + "\n")
+				if currentToken.Type != TknComment {
+					outputFile.WriteString(strconv.Itoa(currentToken.Type) + " " + currentToken.Name + " " + string(currentToken.Lexeme) + " " + strconv.Itoa(currentToken.Row) + " " + strconv.Itoa(currentToken.Column) + "\n")
+				}
 			}
 			currentToken = getToken()
 		}
