@@ -464,7 +464,7 @@ func main() {
 			}
 			currentToken = getToken()
 		}
-		outputFile.WriteString(strconv.Itoa(currentToken.Type) + " " + "Fin de archivo" + " " + "EOF" + " " + strconv.Itoa(currentToken.Row) + " " + strconv.Itoa(currentToken.Column) + "\n")
+		outputFile.WriteString(strconv.Itoa(currentToken.Type) + " " + "FinDeArchivo" + " " + "EOF" + " " + strconv.Itoa(currentToken.Row) + " " + strconv.Itoa(currentToken.Column) + "\n")
 	}
 
 	os.Exit(exitCode)

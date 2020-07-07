@@ -109,13 +109,18 @@ func readTokens() {
 func matchNode(Type int) *Node {
 	var current *Node = new(Node)
 	if tokens[la].Type == Type {
-
 		current.name = tokens[la].Attribute
 		current.Type = Type
 		la++
 	} else {
+		//PANIC
 		errorsFile.WriteString("ERROR en linea " + strconv.Itoa(tokens[la].Row) + ", columna " + strconv.Itoa(tokens[la].Column) + ". ")
 		errorsFile.WriteString("Se esperaba " + tokenNames[Type] + ". Se encontro " + tokens[la].Attribute + ".\n")
+		for tokens[la].Type != Type && tokens[la].Type != TknEOF {
+			la++
+		}
+		current.name = tokens[la].Attribute
+		current.Type = Type
 	}
 
 	return current

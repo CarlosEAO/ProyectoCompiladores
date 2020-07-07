@@ -284,8 +284,6 @@ namespace ProyectoCompiladores
                 currentNode.Nodes.Add(aux);
                 recurre(currentNode);
             }
-
-
         }
 
         private void compileButton_Click(object sender, EventArgs e)
