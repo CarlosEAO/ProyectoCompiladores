@@ -73,7 +73,7 @@ const (
 
 var tokens []Token
 
-//Token blaablabla
+//Token
 type Token struct {
 	Type      int
 	Name      string
@@ -82,7 +82,7 @@ type Token struct {
 	Column    int
 }
 
-//Node para el arbol
+//Node
 type Node struct {
 	name   string
 	lexeme string

@@ -23,6 +23,8 @@ var err error
 
 var keywords = [...]string{"", "program", "if", "then", "else", "fi", "do", "until", "while", "read", "write", "float", "int", "bool", "true", "false", "not", "and", "or"}
 
+//Los índices del arreglo tokenNames coinciden con las constantes numericas de la "enumeracion" token types. Quizas hubiera sido mejor idea utilizar un mapa en lugar de esta cosa bien cerda?
+
 var tokenNames = [...]string{"", "programa", "if", "then", "else", "fi", "do", "until", "while", "read", "write", "float", "int", "bool", "true", "false", "not", "and", "or",
 	"+", "-", "*", "/", "^", "<", "<=", ">", ">=", "==", "!=", "=", ";", ",", "(", ")", "{", "}", "error", "identificador", "eof", "comentario", "constante numerica", "palabra",
 }
@@ -93,12 +95,17 @@ const (
 
 //Token blaablabla
 type Token struct {
+	//Recordando que: type viene de tokn types, name viene de token names, lexeme es exactamente lo que está escrito en el código (para palabras reservadas, lexeme = name, o bueno algo así)
 	Type   int
 	Name   string
 	Lexeme string
 	Row    int
 	Column int
 }
+
+//Quizas la estructura del token (los arreglos y la madre de arriba) deberían estar en un solo archivo?) Hubiera sido más conveniente y menos propenso a este cagadero
+//Hacer ese cambio a estas alturas implica cambiar un buen (creo que un buen la neta no sé) de cosas abajo, entooonces pues alv
+
 
 func getNextChar() rune {
 	if currentColumn == 0 || currentColumn >= len(buffer) {
@@ -183,7 +190,7 @@ func getToken() Token {
 			token.Column = currentColumn
 			if isAlpha(nextChar) { //START OF ANY WORD
 				state = InWord
-			} else if isNumeric(nextChar) { //START OF ANY NUMBER
+			} else if isNumeric(nextChar) { //START OF ANY NUMBER   
 				state = InNumber
 			} else if nextChar == '+' {
 				token.Type = TknSum

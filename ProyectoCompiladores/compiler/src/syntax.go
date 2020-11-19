@@ -70,6 +70,8 @@ const (
 var tokens []Token
 
 //Token blaablabla
+
+//ejemplo de cagadero: En esta estructura una cosa se llama attribute y en la que está declarada en el archivo de lexico se llama lexema  
 type Token struct {
 	Type      int
 	Name      string

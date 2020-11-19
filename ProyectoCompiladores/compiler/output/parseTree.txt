@@ -8,95 +8,47 @@ program , 1
 }
 {
 listaDeclaraciones , 0
+{
+declaracion , 0
+{
+tipo , 0
+{
+int , 12
+}
 }
 {
-listaSentencias , 0
-{
-sentencia , 0
-{
-seleccion , 0
-{
-if , 2
-}
-{
-( , 33
-}
-{
-bExpresion , 0
-{
-bTerm , 0
-{
-notFactor , 0
-{
-bFactor , 0
-{
-relacion , 0
-{
-expresion , 0
-{
-termino , 0
-{
-signoFactor , 0
-{
-factor , 0
+listaIdent , 0
 {
 a , 38
 }
 }
-}
+{
+; , 31
 }
 }
 {
-relOp , 0
+declaracion , 0
 {
-== , 28
-}
-}
+tipo , 0
 {
-expresion , 0
-{
-termino , 0
-{
-signoFactor , 0
-{
-factor , 0
-{
-b , 38
-}
-}
-}
-}
-}
-}
-}
-}
+int , 12
 }
 }
 {
-) , 34
+listaIdent , 0
+{
+EOF , 38
+}
 }
 {
-then , 3
+EOF , 31
 }
-{
-bloque , 0
-{
-{ , 35
+}
 }
 {
 listaSentencias , 0
 }
 {
-} , 36
-}
-}
-{
-fi , 5
-}
-}
-}
-}
-{
-} , 36
+EOF , 36
 }
 }
