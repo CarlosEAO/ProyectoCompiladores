@@ -80,12 +80,12 @@ type Token struct {
 
 //Node
 type Node struct {
-	productionName string
-	token Token
-	childs []*Node
+	ProductionName string
+	Token Token
+	Childs []Node
 }
 
-var root *Node
+var root Node
 
 func readTokens() {
 	file, _ := ioutil.ReadFile(fileName)
@@ -98,10 +98,10 @@ func readTokens() {
 
 }
 
-func matchNode(Type int) *Node {
-	var current *Node = new(Node)
+func matchNode(Type int) Node {
+	var current Node 
 	if tokens[la].Type == Type {
-		current.token = tokens[la]
+		current.Token = tokens[la]
 		la++
 	} else {
 		//PANIC
@@ -110,7 +110,7 @@ func matchNode(Type int) *Node {
 		for tokens[la].Type != Type && tokens[la].Type != TknEOF {
 			la++
 		}
-		current.token = tokens[la]
+		current.Token = tokens[la]
 
 	}
 
@@ -118,336 +118,336 @@ func matchNode(Type int) *Node {
 
 }
 
-func tipo() *Node {
-	var current *Node = new(Node)
-	current.productionName = "tipo"
+func tipo() Node {
+	var current Node 
+	current.ProductionName = "tipo"
 	if tokens[la].Type == TknInt {
-		current.childs = append(current.childs, matchNode(TknInt))
+		current.Childs = append(current.Childs, matchNode(TknInt))
 	} else if tokens[la].Type == TknBool {
-		current.childs = append(current.childs, matchNode(TknBool))
+		current.Childs = append(current.Childs, matchNode(TknBool))
 	} else if tokens[la].Type == TknFloat {
-		current.childs = append(current.childs, matchNode(TknFloat))
+		current.Childs = append(current.Childs, matchNode(TknFloat))
 	}
 	return current
 }
 
-func listaIdent() *Node {
-	var current *Node = new(Node)
-	current.productionName = "listaIdent"
-	current.childs = append(current.childs, matchNode(TknIdent))
+func listaIdent() Node {
+	var current Node 
+	current.ProductionName = "listaIdent"
+	current.Childs = append(current.Childs, matchNode(TknIdent))
 	for tokens[la].Type == TknComma {
-		current.childs = append(current.childs, matchNode(TknComma))
-		//current.childs = append(current.childs, listaIdent())
-		current.childs = append(current.childs, matchNode(TknIdent))
+		current.Childs = append(current.Childs, matchNode(TknComma))
+		//current.Childs = append(current.Childs, listaIdent())
+		current.Childs = append(current.Childs, matchNode(TknIdent))
 	}
 	return current
 }
 
-func declaracion() *Node {
-	var current *Node = new(Node)
-	current.productionName = "declaracion"
-	current.childs = append(current.childs, tipo())
-	current.childs = append(current.childs, listaIdent())
-	current.childs = append(current.childs, matchNode(TknSemi))
+func declaracion() Node {
+	var current Node 
+	current.ProductionName = "declaracion"
+	current.Childs = append(current.Childs, tipo())
+	current.Childs = append(current.Childs, listaIdent())
+	current.Childs = append(current.Childs, matchNode(TknSemi))
 	return current
 }
 
-func listaDeclaraciones() *Node {
-	var current *Node = new(Node)
-	current.productionName = "listaDeclaraciones"
+func listaDeclaraciones() Node {
+	var current Node 
+	current.ProductionName = "listaDeclaraciones"
 	for tokens[la].Type == TknFloat || tokens[la].Type == TknInt || tokens[la].Type == TknBool {
-		current.childs = append(current.childs, declaracion())
-		//current.childs = append(current.childs, listaDeclaraciones())
+		current.Childs = append(current.Childs, declaracion())
+		//current.Childs = append(current.Childs, listaDeclaraciones())
 	}
 	return current
 }
 
-func listaSentencias() *Node {
-	var current *Node = new(Node)
-	current.productionName = "listaSentencias"
+func listaSentencias() Node {
+	var current Node 
+	current.ProductionName = "listaSentencias"
 	for tokens[la].Type == TknIf || tokens[la].Type == TknWhile || tokens[la].Type == TknDo || tokens[la].Type == TknRead || tokens[la].Type == TknWrite || tokens[la].Type == TknLeftBr || tokens[la].Type == TknIdent {
-		current.childs = append(current.childs, sentencia())
+		current.Childs = append(current.Childs, sentencia())
 		//listaSentencias()
 	}
 	return current
 }
 
-func sentencia() *Node {
-	var current *Node = new(Node)
-	current.productionName = "sentencia"
+func sentencia() Node {
+	var current Node 
+	current.ProductionName = "sentencia"
 	if tokens[la].Type == TknIf {
-		current.childs = append(current.childs, seleccion())
+		current.Childs = append(current.Childs, seleccion())
 	} else if tokens[la].Type == TknWhile {
-		current.childs = append(current.childs, iteracion())
+		current.Childs = append(current.Childs, iteracion())
 	} else if tokens[la].Type == TknDo {
-		current.childs = append(current.childs, repeticion())
+		current.Childs = append(current.Childs, repeticion())
 	} else if tokens[la].Type == TknRead {
-		current.childs = append(current.childs, sentRead())
+		current.Childs = append(current.Childs, sentRead())
 	} else if tokens[la].Type == TknWrite {
-		current.childs = append(current.childs, sentWrite())
+		current.Childs = append(current.Childs, sentWrite())
 	} else if tokens[la].Type == TknLeftBr {
-		current.childs = append(current.childs, bloque())
+		current.Childs = append(current.Childs, bloque())
 	} else {
-		current.childs = append(current.childs, asignacion())
+		current.Childs = append(current.Childs, asignacion())
 	}
 	return current
 }
 
-func seleccion() *Node {
-	var current *Node = new(Node)
-	current.productionName = "seleccion"
-	current.childs = append(current.childs, matchNode(TknIf))
-	current.childs = append(current.childs, matchNode(TknLeftPar))
-	current.childs = append(current.childs, bExpresion())
-	current.childs = append(current.childs, matchNode(TknRightPar))
-	current.childs = append(current.childs, matchNode(TknThen))
-	current.childs = append(current.childs, bloque())
+func seleccion() Node {
+	var current Node 
+	current.ProductionName = "seleccion"
+	current.Childs = append(current.Childs, matchNode(TknIf))
+	current.Childs = append(current.Childs, matchNode(TknLeftPar))
+	current.Childs = append(current.Childs, bExpresion())
+	current.Childs = append(current.Childs, matchNode(TknRightPar))
+	current.Childs = append(current.Childs, matchNode(TknThen))
+	current.Childs = append(current.Childs, bloque())
 	if tokens[la].Type == TknElse {
-		current.childs = append(current.childs, matchNode(TknElse))
-		current.childs = append(current.childs, bloque())
+		current.Childs = append(current.Childs, matchNode(TknElse))
+		current.Childs = append(current.Childs, bloque())
 	}
-	current.childs = append(current.childs, matchNode(TknFi))
+	current.Childs = append(current.Childs, matchNode(TknFi))
 	return current
 }
 
-func iteracion() *Node {
-	var current *Node = new(Node)
-	current.productionName = "iteracion"
-	current.childs = append(current.childs, matchNode(TknWhile))
-	current.childs = append(current.childs, matchNode(TknLeftPar))
-	current.childs = append(current.childs, bExpresion())
-	current.childs = append(current.childs, matchNode(TknRightPar))
-	current.childs = append(current.childs, bloque())
+func iteracion() Node {
+	var current Node 
+	current.ProductionName = "iteracion"
+	current.Childs = append(current.Childs, matchNode(TknWhile))
+	current.Childs = append(current.Childs, matchNode(TknLeftPar))
+	current.Childs = append(current.Childs, bExpresion())
+	current.Childs = append(current.Childs, matchNode(TknRightPar))
+	current.Childs = append(current.Childs, bloque())
 	return current
 }
 
-func repeticion() *Node {
-	var current *Node = new(Node)
-	current.productionName = "repeticion"
-	current.childs = append(current.childs, matchNode(TknDo))
-	current.childs = append(current.childs, bloque())
-	current.childs = append(current.childs, matchNode(TknUntil))
-	current.childs = append(current.childs, matchNode(TknLeftPar))
-	current.childs = append(current.childs, bExpresion())
-	current.childs = append(current.childs, matchNode(TknRightPar))
-	current.childs = append(current.childs, matchNode(TknSemi))
+func repeticion() Node {
+	var current Node 
+	current.ProductionName = "repeticion"
+	current.Childs = append(current.Childs, matchNode(TknDo))
+	current.Childs = append(current.Childs, bloque())
+	current.Childs = append(current.Childs, matchNode(TknUntil))
+	current.Childs = append(current.Childs, matchNode(TknLeftPar))
+	current.Childs = append(current.Childs, bExpresion())
+	current.Childs = append(current.Childs, matchNode(TknRightPar))
+	current.Childs = append(current.Childs, matchNode(TknSemi))
 	return current
 }
 
-func sentRead() *Node {
-	var current *Node = new(Node)
-	current.productionName = "sentenciaRead"
-	current.childs = append(current.childs, matchNode(TknRead))
-	current.childs = append(current.childs, matchNode(TknIdent))
-	current.childs = append(current.childs, matchNode(TknSemi))
+func sentRead() Node {
+	var current Node 
+	current.ProductionName = "sentenciaRead"
+	current.Childs = append(current.Childs, matchNode(TknRead))
+	current.Childs = append(current.Childs, matchNode(TknIdent))
+	current.Childs = append(current.Childs, matchNode(TknSemi))
 	return current
 }
 
-func sentWrite() *Node {
-	var current *Node = new(Node)
-	current.productionName = "sentenciaWrite"
-	current.childs = append(current.childs, matchNode(TknWrite))
-	current.childs = append(current.childs, bExpresion())
-	current.childs = append(current.childs, matchNode(TknSemi))
+func sentWrite() Node {
+	var current Node 
+	current.ProductionName = "sentenciaWrite"
+	current.Childs = append(current.Childs, matchNode(TknWrite))
+	current.Childs = append(current.Childs, bExpresion())
+	current.Childs = append(current.Childs, matchNode(TknSemi))
 	return current
 }
 
-func bloque() *Node {
-	var current *Node = new(Node)
-	current.productionName = "bloque"
-	current.childs = append(current.childs, matchNode(TknLeftBr))
-	current.childs = append(current.childs, listaSentencias())
-	current.childs = append(current.childs, matchNode(TknRightBr))
+func bloque() Node {
+	var current Node 
+	current.ProductionName = "bloque"
+	current.Childs = append(current.Childs, matchNode(TknLeftBr))
+	current.Childs = append(current.Childs, listaSentencias())
+	current.Childs = append(current.Childs, matchNode(TknRightBr))
 	return current
 }
 
-func asignacion() *Node {
-	var current *Node = new(Node)
-	current.productionName = "asignacion"
-	current.childs = append(current.childs, matchNode(TknIdent))
-	current.childs = append(current.childs, matchNode(TknAssign))
-	current.childs = append(current.childs, bExpresion())
-	current.childs = append(current.childs, matchNode(TknSemi))
+func asignacion() Node {
+	var current Node 
+	current.ProductionName = "asignacion"
+	current.Childs = append(current.Childs, matchNode(TknIdent))
+	current.Childs = append(current.Childs, matchNode(TknAssign))
+	current.Childs = append(current.Childs, bExpresion())
+	current.Childs = append(current.Childs, matchNode(TknSemi))
 	return current
 }
 
-func bExpresion() *Node {
-	var current *Node = new(Node)
-	current.productionName = "bExpresion"
-	current.childs = append(current.childs, bTerm())
+func bExpresion() Node {
+	var current Node 
+	current.ProductionName = "bExpresion"
+	current.Childs = append(current.Childs, bTerm())
 	for tokens[la].Type == TknOr {
-		current.childs = append(current.childs, matchNode(TknOr))
-		current.childs = append(current.childs, bTerm())
+		current.Childs = append(current.Childs, matchNode(TknOr))
+		current.Childs = append(current.Childs, bTerm())
 	}
 	return current
 }
 
-func bTerm() *Node {
-	var current *Node = new(Node)
-	current.productionName = "bTerm"
-	current.childs = append(current.childs, notFactor())
+func bTerm() Node {
+	var current Node 
+	current.ProductionName = "bTerm"
+	current.Childs = append(current.Childs, notFactor())
 	for tokens[la].Type == TknAnd {
-		current.childs = append(current.childs, matchNode(TknAnd))
-		current.childs = append(current.childs, notFactor())
+		current.Childs = append(current.Childs, matchNode(TknAnd))
+		current.Childs = append(current.Childs, notFactor())
 	}
 	return current
 }
 
-func notFactor() *Node {
-	var current *Node = new(Node)
-	current.productionName = "notFactor"
+func notFactor() Node {
+	var current Node 
+	current.ProductionName = "notFactor"
 	if tokens[la].Type == TknNot {
-		current.childs = append(current.childs, matchNode(TknNot))
+		current.Childs = append(current.Childs, matchNode(TknNot))
 	}
-	current.childs = append(current.childs, bFactor())
+	current.Childs = append(current.Childs, bFactor())
 	return current
 }
 
-func bFactor() *Node {
-	var current *Node = new(Node)
-	current.productionName = "bFactor"
+func bFactor() Node {
+	var current Node 
+	current.ProductionName = "bFactor"
 	if tokens[la].Type == TknTrue || tokens[la].Type == TknFalse {
-		current.childs = append(current.childs, matchNode(tokens[la].Type))
+		current.Childs = append(current.Childs, matchNode(tokens[la].Type))
 	} else {
-		current.childs = append(current.childs, relacion())
+		current.Childs = append(current.Childs, relacion())
 	}
 	return current
 }
 
-func relacion() *Node {
-	var current *Node = new(Node)
-	current.productionName = "relacion"
-	current.childs = append(current.childs, expresion())
+func relacion() Node {
+	var current Node 
+	current.ProductionName = "relacion"
+	current.Childs = append(current.Childs, expresion())
 	if tokens[la].Type == TknLessEq || tokens[la].Type == TknLess || tokens[la].Type == TknGreat || tokens[la].Type == TknGreatEq || tokens[la].Type == TknEq || tokens[la].Type == TknNotEq {
-		current.childs = append(current.childs, relOp())
-		current.childs = append(current.childs, expresion())
+		current.Childs = append(current.Childs, relOp())
+		current.Childs = append(current.Childs, expresion())
 	}
 	return current
 }
 
-func relOp() *Node {
-	var current *Node = new(Node)
-	current.productionName = "relOp"
+func relOp() Node {
+	var current Node 
+	current.ProductionName = "relOp"
 	if tokens[la].Type == TknLessEq {
-		current.childs = append(current.childs, matchNode(TknLessEq))
+		current.Childs = append(current.Childs, matchNode(TknLessEq))
 	} else if tokens[la].Type == TknLess {
-		current.childs = append(current.childs, matchNode(TknLess))
+		current.Childs = append(current.Childs, matchNode(TknLess))
 	} else if tokens[la].Type == TknGreat {
-		current.childs = append(current.childs, matchNode(TknGreat))
+		current.Childs = append(current.Childs, matchNode(TknGreat))
 	} else if tokens[la].Type == TknGreatEq {
-		current.childs = append(current.childs, matchNode(TknGreatEq))
+		current.Childs = append(current.Childs, matchNode(TknGreatEq))
 	} else if tokens[la].Type == TknEq {
-		current.childs = append(current.childs, matchNode(TknEq))
+		current.Childs = append(current.Childs, matchNode(TknEq))
 	} else {
-		current.childs = append(current.childs, matchNode(TknNotEq))
+		current.Childs = append(current.Childs, matchNode(TknNotEq))
 	}
 	return current
 }
 
-func expresion() *Node {
-	var current *Node = new(Node)
-	current.productionName = "expresion"
-	current.childs = append(current.childs, termino())
+func expresion() Node {
+	var current Node 
+	current.ProductionName = "expresion"
+	current.Childs = append(current.Childs, termino())
 	if tokens[la].Type == TknSum || tokens[la].Type == TknSub {
-		current.childs = append(current.childs, sumaOp())
-		current.childs = append(current.childs, termino())
+		current.Childs = append(current.Childs, sumaOp())
+		current.Childs = append(current.Childs, termino())
 	}
 	return current
 }
 
-func termino() *Node {
-	var current *Node = new(Node)
-	current.productionName = "termino"
-	current.childs = append(current.childs, signoFactor())
+func termino() Node {
+	var current Node 
+	current.ProductionName = "termino"
+	current.Childs = append(current.Childs, signoFactor())
 	for tokens[la].Type == TknDiv || tokens[la].Type == TknMul {
-		current.childs = append(current.childs, multOp())
-		current.childs = append(current.childs, signoFactor())
+		current.Childs = append(current.Childs, multOp())
+		current.Childs = append(current.Childs, signoFactor())
 	}
 	return current
 }
 
-func multOp() *Node {
-	var current *Node = new(Node)
-	current.productionName = "multOp"
+func multOp() Node {
+	var current Node 
+	current.ProductionName = "multOp"
 	if tokens[la].Type == TknMul {
-		current.childs = append(current.childs, matchNode(TknMul))
+		current.Childs = append(current.Childs, matchNode(TknMul))
 	} else {
-		current.childs = append(current.childs, matchNode(TknDiv))
+		current.Childs = append(current.Childs, matchNode(TknDiv))
 	}
 	return current
 }
 
-func sumaOp() *Node {
-	var current *Node = new(Node)
-	current.productionName = "sumaOP"
+func sumaOp() Node {
+	var current Node 
+	current.ProductionName = "sumaOP"
 	if tokens[la].Type == TknSub {
-		current.childs = append(current.childs, matchNode(TknSub))
+		current.Childs = append(current.Childs, matchNode(TknSub))
 	} else {
-		current.childs = append(current.childs, matchNode(TknSum))
+		current.Childs = append(current.Childs, matchNode(TknSum))
 	}
 	return current
 }
 
-func signoFactor() *Node {
-	var current *Node = new(Node)
-	current.productionName = "signoFactor"
+func signoFactor() Node {
+	var current Node 
+	current.ProductionName = "signoFactor"
 	if tokens[la].Type == TknSum || tokens[la].Type == TknSub {
-		current.childs = append(current.childs, sumaOp())
-		current.childs = append(current.childs, factor())
+		current.Childs = append(current.Childs, sumaOp())
+		current.Childs = append(current.Childs, factor())
 	} else {
-		current.childs = append(current.childs, factor())
+		current.Childs = append(current.Childs, factor())
 	}
 	return current
 }
 
-func factor() *Node {
-	var current *Node = new(Node)
-	current.productionName = "factor"
+func factor() Node {
+	var current Node 
+	current.ProductionName = "factor"
 	if tokens[la].Type == TknLeftPar {
-		current.childs = append(current.childs, matchNode(TknLeftPar))
-		current.childs = append(current.childs, bExpresion())
-		current.childs = append(current.childs, matchNode(TknRightPar))
+		current.Childs = append(current.Childs, matchNode(TknLeftPar))
+		current.Childs = append(current.Childs, bExpresion())
+		current.Childs = append(current.Childs, matchNode(TknRightPar))
 	} else if tokens[la].Type == TknConst {
-		current.childs = append(current.childs, matchNode(TknConst))
+		current.Childs = append(current.Childs, matchNode(TknConst))
 	} else {
-		current.childs = append(current.childs, matchNode(TknIdent))
+		current.Childs = append(current.Childs, matchNode(TknIdent))
 	}
 	return current
 }
 
-func programa() *Node {
-	var current = new(Node)
+func programa() Node {
+	var current Node
 
-	current.productionName = "programa"
-	current.childs = append(current.childs, matchNode(TknProgram))
-	current.childs = append(current.childs, matchNode(TknLeftBr))
-	current.childs = append(current.childs, listaDeclaraciones())
-	current.childs = append(current.childs, listaSentencias())
-	current.childs = append(current.childs, matchNode(TknRightBr))
+	current.ProductionName = "programa"
+	current.Childs = append(current.Childs, matchNode(TknProgram))
+	current.Childs = append(current.Childs, matchNode(TknLeftBr))
+	current.Childs = append(current.Childs, listaDeclaraciones())
+	current.Childs = append(current.Childs, listaSentencias())
+	current.Childs = append(current.Childs, matchNode(TknRightBr))
 
 	return current
 }
 
-func traverse(current *Node, tab int) {
+func traverse(current Node, tab int) {
 
 
-	/*outputFile.WriteString("{\n")
-	outputFile.WriteString(current.productionName + " , " + strconv.Itoa(current.Type) + "\n")
+	outputFile.WriteString("{\n")
+	outputFile.WriteString(current.ProductionName)
 
-	for i := 0; i < len(current.childs); i++ {
-		traverse(current.childs[i], tab+1)
+	for i := 0; i < len(current.Childs); i++ {
+		traverse(current.Childs[i], tab+1)
 	}
-	outputFile.WriteString("}\n")*/
+	outputFile.WriteString("}\n")
 
 }
 
 //Attribute ST
 //Dont forget to initializee Attributes after calling the new operator
 type NodeWAttributes struct {
-	productionName string
+	ProductionName string
 	token Token
 	Attributes map[string]string
-	childs []*NodeWAttributes
+	Childs []*NodeWAttributes
 }
 
 var rootAAST *NodeWAttributes 
@@ -460,10 +460,10 @@ func copyAttribute(currentST *Node, currentAAST *NodeWAttributes) {
 	currentAAST.lexeme = currentST.lexeme
 	currentAAST.lexeme = currentST.lexeme
 
-	for i := 0; i < len(currentST.childs); i++ {
+	for i := 0; i < len(currentST.Childs); i++ {
 		var newNodeWAttributes * NodeWAttributes= new(NodeWAttributes) 
-		currentAAST.childs = append(currentAAST.childs, newNodeWAttributes)
-		copyAttribute(currentST.childs[i],currentAAST.childs[i] )
+		currentAAST.Childs = append(currentAAST.Childs, newNodeWAttributes)
+		copyAttribute(currentST.Childs[i],currentAAST.Childs[i] )
 	}
 }*/
 
@@ -507,9 +507,9 @@ func main() {
 		la = 0
 		root = programa()
 
-		traverse(root, 0)
+		//traverse(root, 0)
 
-		fmt.Println(len(root.childs))
+		fmt.Println(len(root.Childs[3].Childs))
 
 		output, _ := json.Marshal(root)
 
