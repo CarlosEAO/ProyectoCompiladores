@@ -1,4 +1,1 @@
-ERROR en linea 3, columna 6. Se esperaba identificador. Se encontro int.
-ERROR en linea 6, columna 0. Se esperaba ;. Se encontro EOF.
-ERROR en linea 6, columna 0. Se esperaba }. Se encontro EOF.
-Parseo Terminado
+Parseo TerminadoParseo TerminadoParseo TerminadoParseo TerminadoParseo TerminadoParseo Terminado

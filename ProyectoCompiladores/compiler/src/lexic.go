@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"strconv"
+	"encoding/json"
 )
 
 var fileName string
@@ -25,8 +26,8 @@ var keywords = [...]string{"", "program", "if", "then", "else", "fi", "do", "unt
 
 //Los índices del arreglo tokenNames coinciden con las constantes numericas de la "enumeracion" token types. Quizas hubiera sido mejor idea utilizar un mapa en lugar de esta cosa bien cerda?
 
-var tokenNames = [...]string{"", "programa", "if", "then", "else", "fi", "do", "until", "while", "read", "write", "float", "int", "bool", "true", "false", "not", "and", "or",
-	"+", "-", "*", "/", "^", "<", "<=", ">", ">=", "==", "!=", "=", ";", ",", "(", ")", "{", "}", "error", "identificador", "eof", "comentario", "constante numerica", "palabra",
+var tokenNames = [...]string{"", "programa", "seleccion_if", "seleccion_then", "seleccion_else", "seleccion_fi", "rep_do", "rep_until", "iteracion_while", "sent_read", "sent_write", "tipo_float", "tipo_int", "tipo_bool", "bool_true", "bool_false", "logico_not", "logico_and", "logico_or",
+	"suma", "resta", "multiplicacion", "division", "exponente", "menor_que", "menor_o_igual", "mayor_que", "mayoir_o_igual", "igualdad", "diferente", "asignacion", "punto_y_coma", "coma", "parentesis_izq", "parentesis_der", "llave_izq", "llave_der", "error", "identificador", "eof", "comentario", "constante_numerica", "palabra",
 }
 
 //TOKEN TYPES
@@ -105,7 +106,6 @@ type Token struct {
 
 //Quizas la estructura del token (los arreglos y la madre de arriba) deberían estar en un solo archivo?) Hubiera sido más conveniente y menos propenso a este cagadero
 //Hacer ese cambio a estas alturas implica cambiar un buen (creo que un buen la neta no sé) de cosas abajo, entooonces pues alv
-
 
 func getNextChar() rune {
 	if currentColumn == 0 || currentColumn >= len(buffer) {
@@ -194,21 +194,21 @@ func getToken() Token {
 				state = InNumber
 			} else if nextChar == '+' {
 				token.Type = TknSum
-				token.Name = "Suma"
+				token.Name = tokenNames[TknSum]
 				state = DoneState
 			} else if nextChar == '-' {
 				token.Type = TknSub
-				token.Name = "Resta"
+				token.Name = tokenNames[TknSub]
 				state = DoneState
 			} else if nextChar == '*' {
 				token.Type = TknMul
-				token.Name = "Multiplicacion"
+				token.Name = tokenNames[TknMul]
 				state = DoneState
 			} else if nextChar == '/' { //START OF COMMENT OR DIVISION
 				state = InSlash
 			} else if nextChar == '^' {
 				token.Type = TknExp
-				token.Name = "Exponente"
+				token.Name = tokenNames[TknExp]
 				state = DoneState
 			} else if nextChar == '<' { //LESS THAN OR LTE
 				state = InLessThan
@@ -220,35 +220,35 @@ func getToken() Token {
 				state = InNotEqual
 			} else if nextChar == ';' {
 				token.Type = TknSemi
-				token.Name = "PuntoYComa"
+				token.Name = tokenNames[TknSemi]
 				state = DoneState
 			} else if nextChar == ',' {
 				token.Type = TknComma
-				token.Name = "Coma"
+				token.Name = tokenNames[TknComma]
 				state = DoneState
 			} else if nextChar == '(' {
 				token.Type = TknLeftPar
-				token.Name = "ParentesisIzq"
+				token.Name = tokenNames[TknLeftPar]
 				state = DoneState
 			} else if nextChar == ')' {
 				token.Type = TknRightPar
-				token.Name = "ParentesisDer"
+				token.Name = tokenNames[TknRightPar]
 				state = DoneState
 			} else if nextChar == '{' {
 				token.Type = TknLeftBr
-				token.Name = "LlaveIzq"
+				token.Name = tokenNames[TknLeftBr]
 				state = DoneState
 			} else if nextChar == '}' {
 				token.Type = TknRightBr
-				token.Name = "LlaveDer"
+				token.Name = tokenNames[TknRightBr]
 				state = DoneState
 			} else if nextChar == 0 {
 				token.Type = TknEOF
-				token.Name = "FindeArchivo"
+				token.Name = tokenNames[TknEOF]
 				state = DoneState
 			} else {
 				token.Type = TknError
-				token.Name = "Error"
+				token.Name = tokenNames[TknError]
 				state = DoneState
 			}
 		case InWord:
@@ -269,7 +269,7 @@ func getToken() Token {
 				state = InDecimal
 			} else {
 				token.Type = TknConst
-				token.Name = "ConstanteNumerica"
+				token.Name = tokenNames[TknConst]
 				state = DoneState
 				rollBackChar()
 			}
@@ -280,7 +280,7 @@ func getToken() Token {
 				state = InOptionalDecimal
 			} else {
 				token.Type = TknError
-				token.Name = "Error"
+				token.Name = tokenNames[TknError]
 				state = DoneState
 				rollBackChar()
 			}
@@ -290,12 +290,12 @@ func getToken() Token {
 				token.Lexeme += string(nextChar)
 			} else if nextChar == '.' {
 				token.Type = TknError
-				token.Name = "Error"
+				token.Name = tokenNames[TknError]
 				state = DoneState
 				rollBackChar()
 			} else {
 				token.Type = TknConst
-				token.Name = "ConstanteNumerica"
+				token.Name = tokenNames[TknConst]
 				state = DoneState
 				rollBackChar()
 			}
@@ -309,7 +309,7 @@ func getToken() Token {
 				state = InBlockComment
 			} else {
 				token.Type = TknDiv
-				token.Name = "Division"
+				token.Name = tokenNames[TknDiv]
 				state = DoneState
 				rollBackChar()
 			}
@@ -317,7 +317,7 @@ func getToken() Token {
 			nextChar = getNextChar()
 			if nextChar == '\n' {
 				token.Type = TknComment
-				token.Name = "Comentario"
+				token.Name = tokenNames[TknComment]
 				state = DoneState
 				rollBackChar()
 			} else {
@@ -332,7 +332,7 @@ func getToken() Token {
 			nextChar = getNextChar()
 			if nextChar == '/' {
 				token.Type = TknComment
-				token.Name = "Comentario"
+				token.Name = tokenNames[TknComment]
 				state = DoneState
 			} else if nextChar != '*' {
 				state = InBlockComment
@@ -413,6 +413,8 @@ func getToken() Token {
 	return token
 }
 
+var tokens []Token
+
 func main() {
 
 	var currentToken Token
@@ -428,7 +430,6 @@ func main() {
 			os.Exit(1)
 			log.Fatal(err)
 		}
-
 		reader = bufio.NewReader(sourceFile)
 
 		outputFile, err = os.Create("output/tokens.txt")
@@ -457,6 +458,7 @@ func main() {
 		}()
 
 		currentToken = getToken()
+		tokens = append(tokens, currentToken)
 
 		for currentToken.Type != TknEOF {
 			if currentToken.Type == TknError {
@@ -466,12 +468,17 @@ func main() {
 			} else {
 				//fmt.Println(currentToken)
 				if currentToken.Type != TknComment {
-					outputFile.WriteString(strconv.Itoa(currentToken.Type) + " " + currentToken.Name + " " + string(currentToken.Lexeme) + " " + strconv.Itoa(currentToken.Row) + " " + strconv.Itoa(currentToken.Column) + "\n")
+					//outputFile.WriteString(strconv.Itoa(currentToken.Type) + " " + currentToken.Name + " " + string(currentToken.Lexeme) + " " + strconv.Itoa(currentToken.Row) + " " + strconv.Itoa(currentToken.Column) + "\n")
 				}
 			}
 			currentToken = getToken()
+			tokens = append(tokens, currentToken)
 		}
-		outputFile.WriteString(strconv.Itoa(currentToken.Type) + " " + "FinDeArchivo" + " " + "EOF" + " " + strconv.Itoa(currentToken.Row) + " " + strconv.Itoa(currentToken.Column) + "\n")
+		//outputFile.WriteString(strconv.Itoa(currentToken.Type) + " " + "FinDeArchivo" + " " + "EOF" + " " + strconv.Itoa(currentToken.Row) + " " + strconv.Itoa(currentToken.Column) + "\n")
+		jsonTokens, _ := json.Marshal(tokens)
+		fmt.Println(string(jsonTokens))
+		outputFile.WriteString(string(jsonTokens))
+
 	}
 
 	os.Exit(exitCode)

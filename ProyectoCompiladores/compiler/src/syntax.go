@@ -70,8 +70,6 @@ const (
 var tokens []Token
 
 //Token blaablabla
-
-//ejemplo de cagadero: En esta estructura una cosa se llama attribute y en la que está declarada en el archivo de lexico se llama lexema  
 type Token struct {
 	Type      int
 	Name      string
@@ -81,17 +79,12 @@ type Token struct {
 }
 
 func readTokens() {
-	for scanner.Scan() {
-		s := strings.Split(scanner.Text(), " ")
-		var auxToken Token
-		auxToken.Type, err = strconv.Atoi(s[0])
-		auxToken.Name = s[1]
-		auxToken.Attribute = s[2]
-		auxToken.Row, err = strconv.Atoi(s[3])
-		auxToken.Column, err = strconv.Atoi(s[4])
-		tokens = append(tokens, auxToken)
-
+	file, _ := ioutil.ReadFile(fileName)
+	_ = json.Unmarshal([]byte(file), tokens)
+	for i:=0; i<len(data); i++{
+		fmt.Println(string(data[i].Lexeme))
 	}
+
 }
 
 func match(Type int) bool {

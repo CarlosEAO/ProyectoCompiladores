@@ -1,21 +1,17 @@
 package main
 
 import (
-	"bufio"
 	"fmt"
 	"log"
 	"os"
 	"strconv"
-	"strings"
+	"io/ioutil"
+	"encoding/json"
 )
 
 var fileName string
-var buffer string
-var sourceFile *os.File
 var outputFile *os.File
 var errorsFile *os.File
-
-var scanner *bufio.Scanner
 
 var err error
 
@@ -75,52 +71,47 @@ var tokens []Token
 
 //Token
 type Token struct {
-	Type      int
-	Name      string
-	Attribute string
-	Row       int
-	Column    int
+	Type      int `json:"Type"`
+	Name      string `json:"Name"`
+	Lexeme string `json:Lexeme`
+	Row       int `json:"Row"`
+	Column    int `json:"Column"`
 }
 
 //Node
 type Node struct {
-	name   string
-	lexeme string
-	Type   int
+	productionName string
+	token Token
 	childs []*Node
 }
 
 var root *Node
 
 func readTokens() {
-	for scanner.Scan() {
-		s := strings.Split(scanner.Text(), " ")
-		var auxToken Token
-		auxToken.Type, err = strconv.Atoi(s[0])
-		auxToken.Name = s[1]
-		auxToken.Attribute = s[2]
-		auxToken.Row, err = strconv.Atoi(s[3])
-		auxToken.Column, err = strconv.Atoi(s[4])
-		tokens = append(tokens, auxToken)
+	file, _ := ioutil.ReadFile(fileName)
 
+	_ = json.Unmarshal([]byte(file), &tokens)
+
+	for i:=0; i<len(tokens); i++{
+		fmt.Println(string(tokens[i].Lexeme))
 	}
+
 }
 
 func matchNode(Type int) *Node {
 	var current *Node = new(Node)
 	if tokens[la].Type == Type {
-		current.name = tokens[la].Attribute
-		current.Type = Type
+		current.token = tokens[la]
 		la++
 	} else {
 		//PANIC
 		errorsFile.WriteString("ERROR en linea " + strconv.Itoa(tokens[la].Row) + ", columna " + strconv.Itoa(tokens[la].Column) + ". ")
-		errorsFile.WriteString("Se esperaba " + tokenNames[Type] + ". Se encontro " + tokens[la].Attribute + ".\n")
+		errorsFile.WriteString("Se esperaba " + tokenNames[Type] + ". Se encontro " + tokens[la].Lexeme + ".\n")
 		for tokens[la].Type != Type && tokens[la].Type != TknEOF {
 			la++
 		}
-		current.name = tokens[la].Attribute
-		current.Type = Type
+		current.token = tokens[la]
+
 	}
 
 	return current
@@ -129,7 +120,7 @@ func matchNode(Type int) *Node {
 
 func tipo() *Node {
 	var current *Node = new(Node)
-	current.name = "tipo"
+	current.productionName = "tipo"
 	if tokens[la].Type == TknInt {
 		current.childs = append(current.childs, matchNode(TknInt))
 	} else if tokens[la].Type == TknBool {
@@ -142,7 +133,7 @@ func tipo() *Node {
 
 func listaIdent() *Node {
 	var current *Node = new(Node)
-	current.name = "listaIdent"
+	current.productionName = "listaIdent"
 	current.childs = append(current.childs, matchNode(TknIdent))
 	for tokens[la].Type == TknComma {
 		current.childs = append(current.childs, matchNode(TknComma))
@@ -154,7 +145,7 @@ func listaIdent() *Node {
 
 func declaracion() *Node {
 	var current *Node = new(Node)
-	current.name = "declaracion"
+	current.productionName = "declaracion"
 	current.childs = append(current.childs, tipo())
 	current.childs = append(current.childs, listaIdent())
 	current.childs = append(current.childs, matchNode(TknSemi))
@@ -163,7 +154,7 @@ func declaracion() *Node {
 
 func listaDeclaraciones() *Node {
 	var current *Node = new(Node)
-	current.name = "listaDeclaraciones"
+	current.productionName = "listaDeclaraciones"
 	for tokens[la].Type == TknFloat || tokens[la].Type == TknInt || tokens[la].Type == TknBool {
 		current.childs = append(current.childs, declaracion())
 		//current.childs = append(current.childs, listaDeclaraciones())
@@ -173,7 +164,7 @@ func listaDeclaraciones() *Node {
 
 func listaSentencias() *Node {
 	var current *Node = new(Node)
-	current.name = "listaSentencias"
+	current.productionName = "listaSentencias"
 	for tokens[la].Type == TknIf || tokens[la].Type == TknWhile || tokens[la].Type == TknDo || tokens[la].Type == TknRead || tokens[la].Type == TknWrite || tokens[la].Type == TknLeftBr || tokens[la].Type == TknIdent {
 		current.childs = append(current.childs, sentencia())
 		//listaSentencias()
@@ -183,7 +174,7 @@ func listaSentencias() *Node {
 
 func sentencia() *Node {
 	var current *Node = new(Node)
-	current.name = "sentencia"
+	current.productionName = "sentencia"
 	if tokens[la].Type == TknIf {
 		current.childs = append(current.childs, seleccion())
 	} else if tokens[la].Type == TknWhile {
@@ -204,7 +195,7 @@ func sentencia() *Node {
 
 func seleccion() *Node {
 	var current *Node = new(Node)
-	current.name = "seleccion"
+	current.productionName = "seleccion"
 	current.childs = append(current.childs, matchNode(TknIf))
 	current.childs = append(current.childs, matchNode(TknLeftPar))
 	current.childs = append(current.childs, bExpresion())
@@ -221,7 +212,7 @@ func seleccion() *Node {
 
 func iteracion() *Node {
 	var current *Node = new(Node)
-	current.name = "iteracion"
+	current.productionName = "iteracion"
 	current.childs = append(current.childs, matchNode(TknWhile))
 	current.childs = append(current.childs, matchNode(TknLeftPar))
 	current.childs = append(current.childs, bExpresion())
@@ -232,7 +223,7 @@ func iteracion() *Node {
 
 func repeticion() *Node {
 	var current *Node = new(Node)
-	current.name = "repeticion"
+	current.productionName = "repeticion"
 	current.childs = append(current.childs, matchNode(TknDo))
 	current.childs = append(current.childs, bloque())
 	current.childs = append(current.childs, matchNode(TknUntil))
@@ -245,7 +236,7 @@ func repeticion() *Node {
 
 func sentRead() *Node {
 	var current *Node = new(Node)
-	current.name = "sentenciaRead"
+	current.productionName = "sentenciaRead"
 	current.childs = append(current.childs, matchNode(TknRead))
 	current.childs = append(current.childs, matchNode(TknIdent))
 	current.childs = append(current.childs, matchNode(TknSemi))
@@ -254,7 +245,7 @@ func sentRead() *Node {
 
 func sentWrite() *Node {
 	var current *Node = new(Node)
-	current.name = "sentenciaWrite"
+	current.productionName = "sentenciaWrite"
 	current.childs = append(current.childs, matchNode(TknWrite))
 	current.childs = append(current.childs, bExpresion())
 	current.childs = append(current.childs, matchNode(TknSemi))
@@ -263,7 +254,7 @@ func sentWrite() *Node {
 
 func bloque() *Node {
 	var current *Node = new(Node)
-	current.name = "bloque"
+	current.productionName = "bloque"
 	current.childs = append(current.childs, matchNode(TknLeftBr))
 	current.childs = append(current.childs, listaSentencias())
 	current.childs = append(current.childs, matchNode(TknRightBr))
@@ -272,7 +263,7 @@ func bloque() *Node {
 
 func asignacion() *Node {
 	var current *Node = new(Node)
-	current.name = "asignacion"
+	current.productionName = "asignacion"
 	current.childs = append(current.childs, matchNode(TknIdent))
 	current.childs = append(current.childs, matchNode(TknAssign))
 	current.childs = append(current.childs, bExpresion())
@@ -282,7 +273,7 @@ func asignacion() *Node {
 
 func bExpresion() *Node {
 	var current *Node = new(Node)
-	current.name = "bExpresion"
+	current.productionName = "bExpresion"
 	current.childs = append(current.childs, bTerm())
 	for tokens[la].Type == TknOr {
 		current.childs = append(current.childs, matchNode(TknOr))
@@ -293,7 +284,7 @@ func bExpresion() *Node {
 
 func bTerm() *Node {
 	var current *Node = new(Node)
-	current.name = "bTerm"
+	current.productionName = "bTerm"
 	current.childs = append(current.childs, notFactor())
 	for tokens[la].Type == TknAnd {
 		current.childs = append(current.childs, matchNode(TknAnd))
@@ -304,7 +295,7 @@ func bTerm() *Node {
 
 func notFactor() *Node {
 	var current *Node = new(Node)
-	current.name = "notFactor"
+	current.productionName = "notFactor"
 	if tokens[la].Type == TknNot {
 		current.childs = append(current.childs, matchNode(TknNot))
 	}
@@ -314,7 +305,7 @@ func notFactor() *Node {
 
 func bFactor() *Node {
 	var current *Node = new(Node)
-	current.name = "bFactor"
+	current.productionName = "bFactor"
 	if tokens[la].Type == TknTrue || tokens[la].Type == TknFalse {
 		current.childs = append(current.childs, matchNode(tokens[la].Type))
 	} else {
@@ -325,7 +316,7 @@ func bFactor() *Node {
 
 func relacion() *Node {
 	var current *Node = new(Node)
-	current.name = "relacion"
+	current.productionName = "relacion"
 	current.childs = append(current.childs, expresion())
 	if tokens[la].Type == TknLessEq || tokens[la].Type == TknLess || tokens[la].Type == TknGreat || tokens[la].Type == TknGreatEq || tokens[la].Type == TknEq || tokens[la].Type == TknNotEq {
 		current.childs = append(current.childs, relOp())
@@ -336,7 +327,7 @@ func relacion() *Node {
 
 func relOp() *Node {
 	var current *Node = new(Node)
-	current.name = "relOp"
+	current.productionName = "relOp"
 	if tokens[la].Type == TknLessEq {
 		current.childs = append(current.childs, matchNode(TknLessEq))
 	} else if tokens[la].Type == TknLess {
@@ -355,7 +346,7 @@ func relOp() *Node {
 
 func expresion() *Node {
 	var current *Node = new(Node)
-	current.name = "expresion"
+	current.productionName = "expresion"
 	current.childs = append(current.childs, termino())
 	if tokens[la].Type == TknSum || tokens[la].Type == TknSub {
 		current.childs = append(current.childs, sumaOp())
@@ -366,7 +357,7 @@ func expresion() *Node {
 
 func termino() *Node {
 	var current *Node = new(Node)
-	current.name = "termino"
+	current.productionName = "termino"
 	current.childs = append(current.childs, signoFactor())
 	for tokens[la].Type == TknDiv || tokens[la].Type == TknMul {
 		current.childs = append(current.childs, multOp())
@@ -377,7 +368,7 @@ func termino() *Node {
 
 func multOp() *Node {
 	var current *Node = new(Node)
-	current.name = "multOp"
+	current.productionName = "multOp"
 	if tokens[la].Type == TknMul {
 		current.childs = append(current.childs, matchNode(TknMul))
 	} else {
@@ -388,7 +379,7 @@ func multOp() *Node {
 
 func sumaOp() *Node {
 	var current *Node = new(Node)
-	current.name = "sumaOP"
+	current.productionName = "sumaOP"
 	if tokens[la].Type == TknSub {
 		current.childs = append(current.childs, matchNode(TknSub))
 	} else {
@@ -399,7 +390,7 @@ func sumaOp() *Node {
 
 func signoFactor() *Node {
 	var current *Node = new(Node)
-	current.name = "signoFactor"
+	current.productionName = "signoFactor"
 	if tokens[la].Type == TknSum || tokens[la].Type == TknSub {
 		current.childs = append(current.childs, sumaOp())
 		current.childs = append(current.childs, factor())
@@ -411,7 +402,7 @@ func signoFactor() *Node {
 
 func factor() *Node {
 	var current *Node = new(Node)
-	current.name = "factor"
+	current.productionName = "factor"
 	if tokens[la].Type == TknLeftPar {
 		current.childs = append(current.childs, matchNode(TknLeftPar))
 		current.childs = append(current.childs, bExpresion())
@@ -427,7 +418,7 @@ func factor() *Node {
 func programa() *Node {
 	var current = new(Node)
 
-	current.name = "programa"
+	current.productionName = "programa"
 	current.childs = append(current.childs, matchNode(TknProgram))
 	current.childs = append(current.childs, matchNode(TknLeftBr))
 	current.childs = append(current.childs, listaDeclaraciones())
@@ -438,15 +429,50 @@ func programa() *Node {
 }
 
 func traverse(current *Node, tab int) {
-	outputFile.WriteString("{\n")
-	outputFile.WriteString(current.name + " , " + strconv.Itoa(current.Type) + "\n")
+
+
+	/*outputFile.WriteString("{\n")
+	outputFile.WriteString(current.productionName + " , " + strconv.Itoa(current.Type) + "\n")
 
 	for i := 0; i < len(current.childs); i++ {
 		traverse(current.childs[i], tab+1)
 	}
-	outputFile.WriteString("}\n")
+	outputFile.WriteString("}\n")*/
 
 }
+
+//Attribute ST
+//Dont forget to initializee Attributes after calling the new operator
+type NodeWAttributes struct {
+	productionName string
+	token Token
+	Attributes map[string]string
+	childs []*NodeWAttributes
+}
+
+var rootAAST *NodeWAttributes 
+
+//COPY ATTRIBUTE ST from ST
+/*
+func copyAttribute(currentST *Node, currentAAST *NodeWAttributes) {
+	currentAAST.Attributes = make(map[string]string)
+	currentAAST.name = currentST.name
+	currentAAST.lexeme = currentST.lexeme
+	currentAAST.lexeme = currentST.lexeme
+
+	for i := 0; i < len(currentST.childs); i++ {
+		var newNodeWAttributes * NodeWAttributes= new(NodeWAttributes) 
+		currentAAST.childs = append(currentAAST.childs, newNodeWAttributes)
+		copyAttribute(currentST.childs[i],currentAAST.childs[i] )
+	}
+}*/
+
+
+//compute attributes
+func computeAttributes(currentAAST *NodeWAttributes){
+	
+}
+
 
 func main() {
 
@@ -454,14 +480,6 @@ func main() {
 		fmt.Println("SE DEBE PROPORCIONAR EXACTAMENTE UN ARCHIVO")
 	} else {
 		fileName = string(os.Args[1])
-
-		sourceFile, err = os.Open(fileName)
-		if err != nil {
-			os.Exit(1)
-			log.Fatal(err)
-		}
-
-		scanner = bufio.NewScanner(sourceFile)
 
 		outputFile, err = os.Create("output/parseTree.txt")
 		if err != nil {
@@ -474,10 +492,6 @@ func main() {
 			log.Fatal(err)
 		}
 		defer func() {
-			if err = sourceFile.Close(); err != nil {
-				os.Exit(1)
-				log.Fatal(err)
-			}
 			if err = outputFile.Close(); err != nil {
 				os.Exit(1)
 				log.Fatal(err)
@@ -495,9 +509,21 @@ func main() {
 
 		traverse(root, 0)
 
+		fmt.Println(len(root.childs))
+
+		output, _ := json.Marshal(root)
+
+		outputFile.WriteString(string(output))
+
 		if tokens[la].Type == TknEOF {
 			errorsFile.WriteString("Parseo Terminado")
 		}
+
+		rootAAST = new(NodeWAttributes)
+
+		//copyAttribute(root, rootAAST)
+
+
 
 	}
 
