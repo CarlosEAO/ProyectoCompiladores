@@ -82,10 +82,10 @@ type Token struct {
 type Node struct {
 	ProductionName string
 	Token Token
-	Childs []Node
+	Childs []*Node
 }
 
-var root Node
+var root *Node
 
 func readTokens() {
 	file, _ := ioutil.ReadFile(fileName)
@@ -98,8 +98,8 @@ func readTokens() {
 
 }
 
-func matchNode(Type int) Node {
-	var current Node 
+func matchNode(Type int) *Node {
+	var current *Node = new(Node)
 	if tokens[la].Type == Type {
 		current.Token = tokens[la]
 		la++
@@ -118,8 +118,8 @@ func matchNode(Type int) Node {
 
 }
 
-func tipo() Node {
-	var current Node 
+func tipo() *Node {
+	var current *Node = new(Node)
 	current.ProductionName = "tipo"
 	if tokens[la].Type == TknInt {
 		current.Childs = append(current.Childs, matchNode(TknInt))
@@ -131,8 +131,8 @@ func tipo() Node {
 	return current
 }
 
-func listaIdent() Node {
-	var current Node 
+func listaIdent() *Node {
+	var current *Node = new(Node)
 	current.ProductionName = "listaIdent"
 	current.Childs = append(current.Childs, matchNode(TknIdent))
 	for tokens[la].Type == TknComma {
@@ -143,8 +143,8 @@ func listaIdent() Node {
 	return current
 }
 
-func declaracion() Node {
-	var current Node 
+func declaracion() *Node {
+	var current *Node = new(Node)
 	current.ProductionName = "declaracion"
 	current.Childs = append(current.Childs, tipo())
 	current.Childs = append(current.Childs, listaIdent())
@@ -152,8 +152,8 @@ func declaracion() Node {
 	return current
 }
 
-func listaDeclaraciones() Node {
-	var current Node 
+func listaDeclaraciones() *Node {
+	var current *Node = new(Node)
 	current.ProductionName = "listaDeclaraciones"
 	for tokens[la].Type == TknFloat || tokens[la].Type == TknInt || tokens[la].Type == TknBool {
 		current.Childs = append(current.Childs, declaracion())
@@ -162,8 +162,8 @@ func listaDeclaraciones() Node {
 	return current
 }
 
-func listaSentencias() Node {
-	var current Node 
+func listaSentencias() *Node {
+	var current *Node = new(Node)
 	current.ProductionName = "listaSentencias"
 	for tokens[la].Type == TknIf || tokens[la].Type == TknWhile || tokens[la].Type == TknDo || tokens[la].Type == TknRead || tokens[la].Type == TknWrite || tokens[la].Type == TknLeftBr || tokens[la].Type == TknIdent {
 		current.Childs = append(current.Childs, sentencia())
@@ -172,8 +172,8 @@ func listaSentencias() Node {
 	return current
 }
 
-func sentencia() Node {
-	var current Node 
+func sentencia() *Node {
+	var current *Node = new(Node)
 	current.ProductionName = "sentencia"
 	if tokens[la].Type == TknIf {
 		current.Childs = append(current.Childs, seleccion())
@@ -193,8 +193,8 @@ func sentencia() Node {
 	return current
 }
 
-func seleccion() Node {
-	var current Node 
+func seleccion() *Node {
+	var current *Node = new(Node)
 	current.ProductionName = "seleccion"
 	current.Childs = append(current.Childs, matchNode(TknIf))
 	current.Childs = append(current.Childs, matchNode(TknLeftPar))
@@ -210,8 +210,8 @@ func seleccion() Node {
 	return current
 }
 
-func iteracion() Node {
-	var current Node 
+func iteracion() *Node {
+	var current *Node = new(Node)
 	current.ProductionName = "iteracion"
 	current.Childs = append(current.Childs, matchNode(TknWhile))
 	current.Childs = append(current.Childs, matchNode(TknLeftPar))
@@ -221,8 +221,8 @@ func iteracion() Node {
 	return current
 }
 
-func repeticion() Node {
-	var current Node 
+func repeticion() *Node {
+	var current *Node = new(Node)
 	current.ProductionName = "repeticion"
 	current.Childs = append(current.Childs, matchNode(TknDo))
 	current.Childs = append(current.Childs, bloque())
@@ -234,8 +234,8 @@ func repeticion() Node {
 	return current
 }
 
-func sentRead() Node {
-	var current Node 
+func sentRead() *Node {
+	var current *Node = new(Node)
 	current.ProductionName = "sentenciaRead"
 	current.Childs = append(current.Childs, matchNode(TknRead))
 	current.Childs = append(current.Childs, matchNode(TknIdent))
@@ -243,8 +243,8 @@ func sentRead() Node {
 	return current
 }
 
-func sentWrite() Node {
-	var current Node 
+func sentWrite() *Node {
+	var current *Node = new(Node)
 	current.ProductionName = "sentenciaWrite"
 	current.Childs = append(current.Childs, matchNode(TknWrite))
 	current.Childs = append(current.Childs, bExpresion())
@@ -252,8 +252,8 @@ func sentWrite() Node {
 	return current
 }
 
-func bloque() Node {
-	var current Node 
+func bloque() *Node {
+	var current *Node = new(Node)
 	current.ProductionName = "bloque"
 	current.Childs = append(current.Childs, matchNode(TknLeftBr))
 	current.Childs = append(current.Childs, listaSentencias())
@@ -261,8 +261,8 @@ func bloque() Node {
 	return current
 }
 
-func asignacion() Node {
-	var current Node 
+func asignacion() *Node {
+	var current *Node = new(Node)
 	current.ProductionName = "asignacion"
 	current.Childs = append(current.Childs, matchNode(TknIdent))
 	current.Childs = append(current.Childs, matchNode(TknAssign))
@@ -271,8 +271,8 @@ func asignacion() Node {
 	return current
 }
 
-func bExpresion() Node {
-	var current Node 
+func bExpresion() *Node {
+	var current *Node = new(Node)
 	current.ProductionName = "bExpresion"
 	current.Childs = append(current.Childs, bTerm())
 	for tokens[la].Type == TknOr {
@@ -282,8 +282,8 @@ func bExpresion() Node {
 	return current
 }
 
-func bTerm() Node {
-	var current Node 
+func bTerm() *Node {
+	var current *Node = new(Node)
 	current.ProductionName = "bTerm"
 	current.Childs = append(current.Childs, notFactor())
 	for tokens[la].Type == TknAnd {
@@ -293,8 +293,8 @@ func bTerm() Node {
 	return current
 }
 
-func notFactor() Node {
-	var current Node 
+func notFactor() *Node {
+	var current *Node = new(Node)
 	current.ProductionName = "notFactor"
 	if tokens[la].Type == TknNot {
 		current.Childs = append(current.Childs, matchNode(TknNot))
@@ -303,8 +303,8 @@ func notFactor() Node {
 	return current
 }
 
-func bFactor() Node {
-	var current Node 
+func bFactor() *Node {
+	var current *Node = new(Node)
 	current.ProductionName = "bFactor"
 	if tokens[la].Type == TknTrue || tokens[la].Type == TknFalse {
 		current.Childs = append(current.Childs, matchNode(tokens[la].Type))
@@ -314,8 +314,8 @@ func bFactor() Node {
 	return current
 }
 
-func relacion() Node {
-	var current Node 
+func relacion() *Node {
+	var current *Node = new(Node)
 	current.ProductionName = "relacion"
 	current.Childs = append(current.Childs, expresion())
 	if tokens[la].Type == TknLessEq || tokens[la].Type == TknLess || tokens[la].Type == TknGreat || tokens[la].Type == TknGreatEq || tokens[la].Type == TknEq || tokens[la].Type == TknNotEq {
@@ -325,8 +325,8 @@ func relacion() Node {
 	return current
 }
 
-func relOp() Node {
-	var current Node 
+func relOp() *Node {
+	var current *Node = new(Node)
 	current.ProductionName = "relOp"
 	if tokens[la].Type == TknLessEq {
 		current.Childs = append(current.Childs, matchNode(TknLessEq))
@@ -344,8 +344,8 @@ func relOp() Node {
 	return current
 }
 
-func expresion() Node {
-	var current Node 
+func expresion() *Node {
+	var current *Node = new(Node)
 	current.ProductionName = "expresion"
 	current.Childs = append(current.Childs, termino())
 	if tokens[la].Type == TknSum || tokens[la].Type == TknSub {
@@ -355,8 +355,8 @@ func expresion() Node {
 	return current
 }
 
-func termino() Node {
-	var current Node 
+func termino() *Node {
+	var current *Node = new(Node)
 	current.ProductionName = "termino"
 	current.Childs = append(current.Childs, signoFactor())
 	for tokens[la].Type == TknDiv || tokens[la].Type == TknMul {
@@ -366,8 +366,8 @@ func termino() Node {
 	return current
 }
 
-func multOp() Node {
-	var current Node 
+func multOp() *Node {
+	var current *Node = new(Node)
 	current.ProductionName = "multOp"
 	if tokens[la].Type == TknMul {
 		current.Childs = append(current.Childs, matchNode(TknMul))
@@ -377,8 +377,8 @@ func multOp() Node {
 	return current
 }
 
-func sumaOp() Node {
-	var current Node 
+func sumaOp() *Node {
+	var current *Node = new(Node)
 	current.ProductionName = "sumaOP"
 	if tokens[la].Type == TknSub {
 		current.Childs = append(current.Childs, matchNode(TknSub))
@@ -388,8 +388,8 @@ func sumaOp() Node {
 	return current
 }
 
-func signoFactor() Node {
-	var current Node 
+func signoFactor() *Node {
+	var current *Node = new(Node)
 	current.ProductionName = "signoFactor"
 	if tokens[la].Type == TknSum || tokens[la].Type == TknSub {
 		current.Childs = append(current.Childs, sumaOp())
@@ -400,8 +400,8 @@ func signoFactor() Node {
 	return current
 }
 
-func factor() Node {
-	var current Node 
+func factor() *Node {
+	var current *Node = new(Node)
 	current.ProductionName = "factor"
 	if tokens[la].Type == TknLeftPar {
 		current.Childs = append(current.Childs, matchNode(TknLeftPar))
@@ -415,8 +415,8 @@ func factor() Node {
 	return current
 }
 
-func programa() Node {
-	var current Node
+func programa() *Node {
+	var current = new(Node)
 
 	current.ProductionName = "programa"
 	current.Childs = append(current.Childs, matchNode(TknProgram))
@@ -427,52 +427,6 @@ func programa() Node {
 
 	return current
 }
-
-func traverse(current Node, tab int) {
-
-
-	outputFile.WriteString("{\n")
-	outputFile.WriteString(current.ProductionName)
-
-	for i := 0; i < len(current.Childs); i++ {
-		traverse(current.Childs[i], tab+1)
-	}
-	outputFile.WriteString("}\n")
-
-}
-
-//Attribute ST
-//Dont forget to initializee Attributes after calling the new operator
-type NodeWAttributes struct {
-	ProductionName string
-	token Token
-	Attributes map[string]string
-	Childs []*NodeWAttributes
-}
-
-var rootAAST *NodeWAttributes 
-
-//COPY ATTRIBUTE ST from ST
-/*
-func copyAttribute(currentST *Node, currentAAST *NodeWAttributes) {
-	currentAAST.Attributes = make(map[string]string)
-	currentAAST.name = currentST.name
-	currentAAST.lexeme = currentST.lexeme
-	currentAAST.lexeme = currentST.lexeme
-
-	for i := 0; i < len(currentST.Childs); i++ {
-		var newNodeWAttributes * NodeWAttributes= new(NodeWAttributes) 
-		currentAAST.Childs = append(currentAAST.Childs, newNodeWAttributes)
-		copyAttribute(currentST.Childs[i],currentAAST.Childs[i] )
-	}
-}*/
-
-
-//compute attributes
-func computeAttributes(currentAAST *NodeWAttributes){
-	
-}
-
 
 func main() {
 
@@ -507,9 +461,9 @@ func main() {
 		la = 0
 		root = programa()
 
-		//traverse(root, 0)
+		traverse(root, 0)
 
-		fmt.Println(len(root.Childs[3].Childs))
+		fmt.Println(len(root.Childs))
 
 		output, _ := json.Marshal(root)
 
@@ -518,15 +472,7 @@ func main() {
 		if tokens[la].Type == TknEOF {
 			errorsFile.WriteString("Parseo Terminado")
 		}
-
-		rootAAST = new(NodeWAttributes)
-
-		//copyAttribute(root, rootAAST)
-
-
-
 	}
-
 	os.Exit(0)
 
 }
