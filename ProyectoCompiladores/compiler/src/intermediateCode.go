@@ -85,16 +85,77 @@ type Node struct {
 	Attributes map[string]string `json:"Attributes"`
 }
 
+//cuadruplo
+type Cuadruplo struct{
+	First string `json:"First"`
+	Second string `json:"Second"`
+	Third string `json:"Third"`
+	Fourth string `json:"Fourth"`
+}
+
 var root *Node
 
 var labelTotal int
 var temporaryTotal int
+var cuadruplos []Cuadruplo
+
+
 
 func generateCode(current *Node){
 
-	for i := 0; i < len(current.Childs); i++ {
-		generateCode(current.Childs[i])
+	if(current.ProductionName == "seleccion"){
+		labelTotal = labelTotal + 1
+		currentLabel:=labelTotal
+
+		generateCode(current.Childs[2])
+
+		if(len(current.Childs)==7){
+			//without else
+
+			outputFile.WriteString("if_f , " + current.Childs[2].Attributes["idTemp"] + " goto label"+strconv.Itoa(currentLabel) +"\n")
+			generateCode(current.Childs[5])
+			outputFile.WriteString("label"+strconv.Itoa(currentLabel)+"\n")
+		}else{
+			//with else
+			outputFile.WriteString("if_f , " + current.Childs[2].Attributes["idTemp"] + " goto label"+strconv.Itoa(currentLabel) +"\n")
+			generateCode(current.Childs[5])
+			outputFile.WriteString("label"+strconv.Itoa(currentLabel)+"\n")
+			generateCode(current.Childs[7])
+		}
+	}else if current.ProductionName == "iteracion"{
+		labelTotal = labelTotal + 1
+		labelBeginning:=labelTotal
+		labelTotal = labelTotal + 1
+		labelEnd:=labelTotal
+		outputFile.WriteString("label"+strconv.Itoa(labelBeginning)+"\n");
+
+		generateCode(current.Childs[2])
+
+		outputFile.WriteString("if_f , " + current.Childs[2].Attributes["idTemp"] + " goto label"+strconv.Itoa(labelEnd) +"\n")
+		generateCode(current.Childs[4])
+		outputFile.WriteString("goto label"+strconv.Itoa(labelBeginning)+"\n");
+		outputFile.WriteString("label"+strconv.Itoa(labelEnd)+"\n")
+		
+	}else if current.ProductionName == "repeticion"{
+		labelTotal = labelTotal + 1
+		labelBeginning:=labelTotal
+		labelTotal = labelTotal + 1
+		labelEnd:=labelTotal
+
+		outputFile.WriteString("label"+strconv.Itoa(labelBeginning)+"\n");
+		generateCode(current.Childs[1])
+		generateCode(current.Childs[4])
+		outputFile.WriteString("if_f , " + current.Childs[4].Attributes["idTemp"] + " goto label"+strconv.Itoa(labelEnd) +"\n")
+		outputFile.WriteString("goto label"+strconv.Itoa(labelBeginning)+"\n");
+		outputFile.WriteString("label"+strconv.Itoa(labelEnd)+"\n");
+
+	}else{
+		for i := 0; i < len(current.Childs); i++ {
+			generateCode(current.Childs[i])
+		}
 	}
+
+	
 
 	if current.ProductionName == "factor"{
 		temporaryTotal = temporaryTotal + 1;
@@ -164,6 +225,15 @@ func generateCode(current *Node){
 	if(current.ProductionName == "asignacion"){
 		outputFile.WriteString("( "+current.Childs[0].Token.Lexeme +" , " + current.Childs[2].Attributes["idTemp"]+ " )\n");
 	}
+
+	if(current.ProductionName == "sentenciaWrite"){
+		outputFile.WriteString("( write "+current.Childs[1].Attributes["idTemp"]+" )\n");
+	}
+	if(current.ProductionName == "sentenciaRead"){
+		outputFile.WriteString("( read "+current.Childs[1].Token.Lexeme+" )\n");
+	}
+
+
 
 
 }
