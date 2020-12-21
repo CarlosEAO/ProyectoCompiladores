@@ -12,6 +12,7 @@ import (
 var fileName string
 var outputFile *os.File
 var errorsFile *os.File
+var noErrors bool
 
 var err error
 
@@ -112,6 +113,7 @@ func computeAttributes(current *Node, parent *Node){
 
 				if symbols[current.Childs[i].Token.Lexeme]!=nil{
 					errorsFile.WriteString("VALIO madres, redeclarando " + current.Childs[i].Token.Lexeme+"\n")
+					noErrors = false
 				}else{
 					current.Childs[i].Attributes["dtype"] = parent.Childs[0].Attributes["dtype"];
 					current.Childs[i].Attributes["value"] = "0";
@@ -134,7 +136,8 @@ func computeAttributes(current *Node, parent *Node){
 					current.Attributes["value"] = symbols[current.Childs[0].Token.Lexeme]["value"];
 				}else{
 					current.Attributes["value"] = "0";
-					errorsFile.WriteString(current.Childs[0].Token.Lexeme + " no está declarado");
+					errorsFile.WriteString(current.Childs[0].Token.Lexeme + " no está declarado\n");
+					noErrors = false
 				}
 			}
 		}else{
@@ -171,7 +174,8 @@ func computeAttributes(current *Node, parent *Node){
 				ans = term1*term2;
 			}else{
 				if(term2 == 0){
-					errorsFile.WriteString("VALIO VERGA, ANDAS DIVIDIENDO ENTRE 0");
+					errorsFile.WriteString("VALIO MADRE, ANDAS DIVIDIENDO ENTRE 0");
+					noErrors = false
 				}else{
 					ans = term1/term2;
 				}
@@ -321,7 +325,8 @@ func computeAttributes(current *Node, parent *Node){
 			current.Childs[0].Attributes["value"] = current.Childs[2].Attributes["value"];
 			symbols[current.Childs[0].Token.Lexeme]["value"] = current.Childs[0].Attributes["value"];
 		}else{
-			errorsFile.WriteString(current.Childs[0].Token.Lexeme + " no está declarado");
+			errorsFile.WriteString(current.Childs[0].Token.Lexeme + " no está declarado\n");
+			noErrors = false
 		}
 	}
 
@@ -364,12 +369,16 @@ func main() {
 
 		initializeAttributesMaps(root)
 		symbols = make(map[string]map[string]string)
+		noErrors = true
 
 		computeAttributes(root, nil)
 
 		output, _ := json.Marshal(root)
 
 		outputFile.WriteString(string(output))
+		if noErrors == true{
+			errorsFile.WriteString("No hubo errores semánticos\n")
+		}
 
 
 	}

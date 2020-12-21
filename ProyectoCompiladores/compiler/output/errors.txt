@@ -1,2 +1,3 @@
 Parseo léxico correcto
 Parseo sintáctico correcto
+No hubo errores semánticos
