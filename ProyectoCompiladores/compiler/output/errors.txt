@@ -1,1 +1,2 @@
-Parseo Terminado
+Parseo léxico correcto
+Parseo sintáctico correcto

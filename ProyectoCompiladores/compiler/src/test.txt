@@ -1,5 +1,5 @@
 program {
-int x, y,z;
-write x;
-write y;
+    int x, y,z;
+    int x;
+    x=1+2;
 }

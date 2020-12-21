@@ -1,0 +1,33 @@
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Text.Json;
+
+namespace test
+{
+    public class Token
+    {
+        public int Type { get; set; }
+        public string Name { get; set; }
+        public string Lexeme { get; set; }
+        public int Row { get; set; }
+        public int Column { get; set; }
+    }
+
+    public class TokenJson
+    {
+        public Token Token;
+    }
+
+
+    class Program
+    {
+        static void Main(string[] args)
+        {
+
+            string jsonString = File.ReadAllText("tokens.txt");
+            var token = JsonSerializer.Deserialize<Token[]>(jsonString);
+
+            Console.WriteLine(token[0].Lexeme);
+        }
+    }

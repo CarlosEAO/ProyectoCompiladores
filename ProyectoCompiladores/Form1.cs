@@ -10,9 +10,11 @@ using System.Windows.Forms;
 using System.IO;
 using System.Text.RegularExpressions;
 using System.Diagnostics;
+using Newtonsoft.Json;
 
 namespace ProyectoCompiladores
 {
+
     public partial class Form1 : Form
     {
         #region "Avoid flickering"
@@ -78,9 +80,6 @@ namespace ProyectoCompiladores
                 fileSaved = true;
             } 
         }
-
-       
-
 
         void Parse(string code)
         {
@@ -255,34 +254,51 @@ namespace ProyectoCompiladores
            
         }
 
-        System.IO.StreamReader parseTreeFile;
-
-
-        private void recurre(TreeNode currentNode)
+        private void recurreSyntaxTree(NodeSyntaxTreeView currentViewNode, NodeSyntaxTree currentNode)
         {
-            string aux = parseTreeFile.ReadLine();
-            if(aux == null)
+            
+            currentViewNode.ProductionName = currentNode.ProductionName;
+            
+            currentViewNode.Token = currentNode.Token;
+
+            currentViewNode.Text = currentViewNode.ToString();
+
+            if (currentNode.Childs == null)
             {
-                parseTreeFile.Close();
                 return;
             }
-            if(aux == "}")
-            {
-                recurre(currentNode.Parent);
-            }
-            else if (aux == "{")
-            {
-                TreeNode newNode = new TreeNode();
 
-                aux = parseTreeFile.ReadLine();
-                newNode.Text = aux;
-                currentNode.Nodes.Add(newNode);
-                recurre(newNode);
-            }
-            else
+            foreach (NodeSyntaxTree child in currentNode.Childs)
             {
-                currentNode.Nodes.Add(aux);
-                recurre(currentNode);
+                NodeSyntaxTreeView newNode = new NodeSyntaxTreeView();
+                currentViewNode.Nodes.Add(newNode);
+                recurreSyntaxTree(newNode, child);
+                
+            }
+        }
+
+
+        private void recurreAttributedTree(AttributedNodeSyntaxTreeView currentViewNode, AttributedNodeSyntaxTree currentNode)
+        {
+
+            currentViewNode.ProductionName = currentNode.ProductionName;
+
+            currentViewNode.Token = currentNode.Token;
+            currentViewNode.AttributesAsString = string.Join(Environment.NewLine, currentNode.Attributes);
+
+            currentViewNode.Text = currentViewNode.ToString();
+
+            if (currentNode.Childs == null)
+            {
+                return;
+            }
+
+            foreach (AttributedNodeSyntaxTree child in currentNode.Childs)
+            {
+                AttributedNodeSyntaxTreeView newNode = new AttributedNodeSyntaxTreeView();
+                currentViewNode.Nodes.Add(newNode);
+                recurreAttributedTree(newNode, child);
+
             }
         }
 
@@ -290,7 +306,8 @@ namespace ProyectoCompiladores
         {
             saveFile();
             if (!fileSaved) return;
-            
+
+            //Lexic
 
             Process lexicProcess = new Process();
             lexicProcess.StartInfo.WorkingDirectory = Path.Combine(Directory.GetParent(Environment.CurrentDirectory).Parent.FullName, "compiler");
@@ -299,8 +316,9 @@ namespace ProyectoCompiladores
             lexicProcess.Start();
             lexicProcess.WaitForExit();
 
-            lexicRichTextBox.Text = File.ReadAllText(Path.Combine(Directory.GetParent(Environment.CurrentDirectory).Parent.FullName, "compiler\\output\\tokens.txt"));
+            string lexicOutput = File.ReadAllText(Path.Combine(Directory.GetParent(Environment.CurrentDirectory).Parent.FullName, "compiler\\output\\tokens.txt"));
 
+            //Syntax
 
             Process syntaxProcess = new Process();
             syntaxProcess.StartInfo.WorkingDirectory = Path.Combine(Directory.GetParent(Environment.CurrentDirectory).Parent.FullName, "compiler");
@@ -309,19 +327,121 @@ namespace ProyectoCompiladores
             syntaxProcess.Start();
             syntaxProcess.WaitForExit();
 
-            TreeNode parseTreeRoot = new TreeNode();
-            parseTreeRoot.Text = "raiz";
-            parseTreeFile = new System.IO.StreamReader(Path.Combine(Directory.GetParent(Environment.CurrentDirectory).Parent.FullName, "compiler\\output\\parseTree.txt"));
+            string syntaxOutput = File.ReadAllText(Path.Combine(Directory.GetParent(Environment.CurrentDirectory).Parent.FullName, "compiler\\output\\parseTree.txt"));
 
-            recurre(parseTreeRoot);
+            NodeSyntaxTree parseTreeRoot = JsonConvert.DeserializeObject<NodeSyntaxTree>(syntaxOutput);
+
+            NodeSyntaxTreeView parseTreeViewRoot = new NodeSyntaxTreeView();
+
+            recurreSyntaxTree(parseTreeViewRoot, parseTreeRoot);
             parseTreeView.Nodes.Clear();
-            parseTreeView.Nodes.Add(parseTreeRoot);
+            parseTreeView.Nodes.Add(parseTreeViewRoot);
 
+            //Semantic
+            
+            Process semanticProcess = new Process();
+            semanticProcess.StartInfo.WorkingDirectory = Path.Combine(Directory.GetParent(Environment.CurrentDirectory).Parent.FullName, "compiler");
+            semanticProcess.StartInfo.FileName = "semantic.exe";
+            semanticProcess.StartInfo.Arguments = Path.Combine(Directory.GetParent(Environment.CurrentDirectory).Parent.FullName, "compiler\\output\\parseTree.txt");
+            semanticProcess.Start();
+            semanticProcess.WaitForExit();
 
+            string semanticOutput = File.ReadAllText(Path.Combine(Directory.GetParent(Environment.CurrentDirectory).Parent.FullName, "compiler\\output\\attributedST.txt"));
+
+            AttributedNodeSyntaxTree attributedTreeRoot = JsonConvert.DeserializeObject<AttributedNodeSyntaxTree>(semanticOutput);
+
+            AttributedNodeSyntaxTreeView attributedTreeViewRoot = new AttributedNodeSyntaxTreeView();
+
+            recurreAttributedTree(attributedTreeViewRoot, attributedTreeRoot);
+            attributedTreeView.Nodes.Clear();
+            attributedTreeView.Nodes.Add(attributedTreeViewRoot);
+
+            //intermediateCode
+
+            Process intermediateCodeProcess = new Process();
+            intermediateCodeProcess.StartInfo.WorkingDirectory = Path.Combine(Directory.GetParent(Environment.CurrentDirectory).Parent.FullName, "compiler");
+            intermediateCodeProcess.StartInfo.FileName = "intermediateCode.exe";
+            intermediateCodeProcess.StartInfo.Arguments = Path.Combine(Directory.GetParent(Environment.CurrentDirectory).Parent.FullName, "compiler\\output\\attributedST.txt");
+            intermediateCodeProcess.Start();
+            intermediateCodeProcess.WaitForExit();
+
+            string intermediateCodeOutput = File.ReadAllText(Path.Combine(Directory.GetParent(Environment.CurrentDirectory).Parent.FullName, "compiler\\output\\intermediateCode.txt"));
+
+            intermediateCodeRichTextBox.Text = intermediateCodeOutput;
             errorsRichTextBox.Text = File.ReadAllText(Path.Combine(Directory.GetParent(Environment.CurrentDirectory).Parent.FullName, "compiler\\output\\errors.txt"));
 
         }
-
-        
     }
+
+    public class Token
+    {
+        public int Type { get; set; }
+        public string Name { get; set; }
+        public string Lexeme { get; set; }
+        public int Row { get; set; }
+        public int Column { get; set; }
+
+        public override string ToString()
+        {
+            return "Name:" +Name.ToString() + " Lexeme: " + Lexeme.ToString() + ". \n";
+        }
+
+    }
+
+    //USADA PARA DESERIALIZAR EL JSON QUE ARROJA EL PROCESO
+
+    public class NodeSyntaxTree
+    {
+        public string ProductionName { get; set; }
+        public Token Token { get; set; }
+        public NodeSyntaxTree[] Childs { get; set; }
+    }
+
+    //USADA PARA POPULAR LOS CAMPOS DEL TREEVIEW CORRESPONDIENTE
+
+    public class NodeSyntaxTreeView : TreeNode
+    {
+        public string ProductionName { get; set; }
+        public Token Token { get; set; }
+        public override string ToString()
+        {
+            if (Token.Type == 0)
+            {
+                return "Production Name: " + ProductionName.ToString() + ". \n";
+            }
+
+            return "Token: \n" + Token.ToString();
+        }
+    }
+
+
+    //USADA PARA DESERIALIZAR EL JSON QUE ARROJA EL PROCESO
+
+    public class AttributedNodeSyntaxTree
+    {
+        public string ProductionName { get; set; }
+        public Token Token { get; set; }
+        public AttributedNodeSyntaxTree[] Childs { get; set; }
+        public Dictionary<string,string> Attributes { get; set; }
+    }
+
+    //USADA PARA POPULAR LOS CAMPOS DEL TREEVIEW CORRESPONDIENTE
+    public class AttributedNodeSyntaxTreeView : TreeNode
+    {
+        public string ProductionName { get; set; }
+        public Token Token { get; set; }
+        public string AttributesAsString { get; set; }
+        public override string ToString()
+        {
+            if (Token.Type == 0)
+            {
+                return "Production Name: " + ProductionName.ToString() + ". \n" + "Atributos: " + AttributesAsString;
+            }
+
+            return "Token: \n" + Token.ToString() + "Atributos: " + AttributesAsString;
+        }
+    }
+
 }
+
+

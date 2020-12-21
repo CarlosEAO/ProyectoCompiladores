@@ -22,12 +22,15 @@ var currentLine int = 0
 
 var err error
 
-var keywords = [...]string{"", "program", "if", "then", "else", "fi", "do", "until", "while", "read", "write", "float", "int", "bool", "true", "false", "not", "and", "or"}
+var keywords = [...]string{"", "program", "if", "then", "else", "fi", "do", 
+	"until", "while", "read", "write", "float", "int", "bool", "true", "false", "not", "and", "or"}
 
 //Los índices del arreglo tokenNames coinciden con las constantes numericas de la "enumeracion" token types. Quizas hubiera sido mejor idea utilizar un mapa en lugar de esta cosa bien cerda?
 
-var tokenNames = [...]string{"", "programa", "seleccion_if", "seleccion_then", "seleccion_else", "seleccion_fi", "rep_do", "rep_until", "iteracion_while", "sent_read", "sent_write", "tipo_float", "tipo_int", "tipo_bool", "bool_true", "bool_false", "logico_not", "logico_and", "logico_or",
-	"suma", "resta", "multiplicacion", "division", "exponente", "menor_que", "menor_o_igual", "mayor_que", "mayoir_o_igual", "igualdad", "diferente", "asignacion", "punto_y_coma", "coma", "parentesis_izq", "parentesis_der", "llave_izq", "llave_der", "error", "identificador", "eof", "comentario", "constante_numerica", "palabra",
+var tokenNames = [...]string{"", "programa", "seleccion_if", "seleccion_then", "seleccion_else", "seleccion_fi", "rep_do", "rep_until", "iteracion_while", 
+	"sent_read", "sent_write", "tipo_float", "tipo_int", "tipo_bool", "bool_true", "bool_false", "logico_not", "logico_and", "logico_or",
+	"suma", "resta", "multiplicacion", "division", "exponente", "menor_que", "menor_o_igual", "mayor_que", "mayor_o_igual", "igualdad", "diferente", 
+	"asignacion", "punto_y_coma", "coma", "parentesis_izq", "parentesis_der", "llave_izq", l"lave_der", "error", "identificador", "eof", "comentario", "constante_numerica", "palabra",
 }
 
 //TOKEN TYPES
@@ -104,7 +107,8 @@ type Token struct {
 	Column int
 }
 
-//Quizas la estructura del token (los arreglos y la madre de arriba) deberían estar en un solo archivo?) Hubiera sido más conveniente y menos propenso a este cagadero
+//Quizas la estructura del token (los arreglos y la madre de arriba) deberían estar en un solo archivo?) 
+//Hubiera sido más conveniente y menos propenso a este cagadero
 //Hacer ese cambio a estas alturas implica cambiar un buen (creo que un buen la neta no sé) de cosas abajo, entooonces pues alv
 
 func getNextChar() rune {
@@ -459,9 +463,11 @@ func main() {
 
 		currentToken = getToken()
 		tokens = append(tokens, currentToken)
+		noErrors := true
 
 		for currentToken.Type != TknEOF {
 			if currentToken.Type == TknError {
+				noErrors = false
 				//fmt.Println("Valio madre en la linea ", currentLine, ", '", currentToken.Lexeme, "' no corresponde a ningun token")
 				exitCode = 2
 				errorsFile.WriteString("Valio madre en la linea " + strconv.Itoa(currentLine) + ", columna " + strconv.Itoa(currentColumn) + ". '" + currentToken.Lexeme + "' no corresponde a ningun token.\n")
@@ -478,7 +484,9 @@ func main() {
 		jsonTokens, _ := json.Marshal(tokens)
 		fmt.Println(string(jsonTokens))
 		outputFile.WriteString(string(jsonTokens))
-
+		if noErrors == true{
+			errorsFile.WriteString("Parseo léxico correcto\n")
+		}
 	}
 
 	os.Exit(exitCode)

@@ -359,7 +359,7 @@ func termino() *Node {
 	var current *Node = new(Node)
 	current.ProductionName = "termino"
 	current.Childs = append(current.Childs, signoFactor())
-	for tokens[la].Type == TknDiv || tokens[la].Type == TknMul {
+	if tokens[la].Type == TknDiv || tokens[la].Type == TknMul {
 		current.Childs = append(current.Childs, multOp())
 		current.Childs = append(current.Childs, signoFactor())
 	}
@@ -379,7 +379,7 @@ func multOp() *Node {
 
 func sumaOp() *Node {
 	var current *Node = new(Node)
-	current.ProductionName = "sumaOP"
+	current.ProductionName = "sumaOp"
 	if tokens[la].Type == TknSub {
 		current.Childs = append(current.Childs, matchNode(TknSub))
 	} else {
@@ -461,8 +461,6 @@ func main() {
 		la = 0
 		root = programa()
 
-		traverse(root, 0)
-
 		fmt.Println(len(root.Childs))
 
 		output, _ := json.Marshal(root)
@@ -470,7 +468,7 @@ func main() {
 		outputFile.WriteString(string(output))
 
 		if tokens[la].Type == TknEOF {
-			errorsFile.WriteString("Parseo Terminado")
+			errorsFile.WriteString("Parseo sintáctico correcto\n")
 		}
 	}
 	os.Exit(0)
